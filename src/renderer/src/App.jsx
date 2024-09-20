@@ -1,5 +1,6 @@
 import IconMenu from './components/IconMenu'
 import MainSection from './components/MainSection'
+import PopUpMenu from './components/PopUpMenu'
 import StatusBar from './components/StatusBar'
 
 function App() {
@@ -11,6 +12,9 @@ function App() {
         <IconMenu />
         <StatusBar />
         <MainSection />
+        <PopUpMenu>
+          <div className="bg-ctp-surface2 size-80"></div>
+        </PopUpMenu>
       </div>
     </>
   )
