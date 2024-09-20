@@ -12,9 +12,6 @@ function App() {
         <IconMenu />
         <StatusBar />
         <MainSection />
-        <PopUpMenu>
-          <div className="bg-ctp-surface2 size-80"></div>
-        </PopUpMenu>
       </div>
     </>
   )
