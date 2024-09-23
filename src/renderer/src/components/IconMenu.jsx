@@ -13,7 +13,7 @@ export default function IconMenu() {
           <div
             className="text-ctp-text hover:text-ctp-green p-1"
             onClick={() => {
-              isEnabled ? setIsEnabled(false) : setIsEnabled(true)
+              setIsEnabled(true)
             }}
           >
             <FaFile />
@@ -43,7 +43,11 @@ export default function IconMenu() {
         </div>
         {/* Pop-up Menü */}
         {isEnabled && (
-          <PopUpMenu>
+          <PopUpMenu
+            onClick={() => {
+              setIsEnabled(false)
+            }}
+          >
             <div className="bg-ctp-surface2 size-80"></div>
           </PopUpMenu>
         )}
