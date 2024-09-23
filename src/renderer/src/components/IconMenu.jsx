@@ -4,19 +4,14 @@ import { useState } from 'react'
 import { FaGear } from 'react-icons/fa6'
 
 export default function IconMenu() {
-  const [isEnabled, setIsEnabled] = useState(false)
+  const [settingIsOpen, setsettingIsOpen] = useState(false)
 
   return (
     <div className="h-8">
       <div className="flex">
         <div className="flex space-x-2 m-1">
           {/* New Project */}
-          <div
-            className="text-ctp-text hover:text-ctp-green p-1"
-            onClick={() => {
-              setIsEnabled(true)
-            }}
-          >
+          <div className="text-ctp-text hover:text-ctp-green p-1">
             <FaFile />
           </div>
 
@@ -41,19 +36,26 @@ export default function IconMenu() {
           </div>
 
           {/* Project / Communication Settings */}
-          <div className="text-ctp-text hover:text-ctp-green p-1">
+          <div
+            className="text-ctp-text hover:text-ctp-green p-1"
+            onClick={() => {
+              setsettingIsOpen(true)
+            }}
+          >
             <FaGear />
           </div>
         </div>
 
         {/* Pop-up Menü */}
-        {isEnabled && (
+        {settingIsOpen && (
           <PopUpMenu
             onClick={() => {
-              setIsEnabled(false)
+              setsettingIsOpen(false)
             }}
           >
-            <div className="bg-ctp-surface2 size-80"></div>
+            <div className="select-none">
+              <p className="text-ctp-text text-2xl font-bold text-center">This is setting pop-up</p>
+            </div>
           </PopUpMenu>
         )}
       </div>
