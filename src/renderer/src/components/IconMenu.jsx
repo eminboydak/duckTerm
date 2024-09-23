@@ -46,7 +46,7 @@ export default function IconMenu() {
           </div>
         </div>
 
-        {/* Pop-up Menü */}
+        {/* Pop-up Menu */}
         {settingIsOpen && (
           <PopUpMenu
             onClick={() => {
