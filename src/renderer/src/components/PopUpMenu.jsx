@@ -5,7 +5,7 @@ export default function PopUpMenu({ onClick, children }) {
 
       <div className="absolute size-full flex justify-center pointer-events-none">
         <div className="bg-ctp-surface1 size-auto place-self-center shadow-lg pointer-events-auto">
-          <div className="m-3 h-auto w-auto">{children}</div>
+          <div className="m-5 h-auto w-auto">{children}</div>
         </div>
       </div>
     </div>
