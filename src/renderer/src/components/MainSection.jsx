@@ -20,7 +20,10 @@ export default function MainSection() {
           <div className="flex flex-col p-1 h-full">
             {/* Communication Window */}
             <div className="bg-ctp-surface1 m-1 flex-1">
-              <h1 className="text-center text-ctp-text">3.2</h1>
+              <h1 className="text-center text-ctp-text">3.2.1</h1>
+            </div>
+            <div className="bg-ctp-surface1 m-1 basis-1/4">
+              <h1 className="text-center text-ctp-text">3.2.2</h1>
             </div>
           </div>
         </div>
