@@ -8,7 +8,7 @@ function App() {
 
   return (
     <>
-      <div className="ctp-mocha bg-ctp-base flex flex-col h-screen">
+      <div className="ctp-macchiato bg-ctp-base flex flex-col h-screen">
         <IconMenu />
         <StatusBar />
         <MainSection />
