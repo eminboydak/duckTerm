@@ -13,16 +13,17 @@ export default function IconMenu() {
       title: 'Communication',
       content: (
         <div>
-          <form className="max-w-sm mx-auto">
+          <form className="max-w-sm mx-auto grid grid-cols-3 gap-4">
+            {/* Device: */}
             <label
-              htmlFor="countries"
-              className="block mb-2 font-bold text-ctp-text"
+              htmlFor="device"
+              className="block mb-2 font-bold text-ctp-text text-right content-center"
             >
               Device:
             </label>
             <select
-              id="countries"
-              className="bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
+              id="device"
+              className="col-span-2 bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
             >
               {serialPorts.length > 0 ? (
                 serialPorts.map((port, index) => (
@@ -34,12 +35,87 @@ export default function IconMenu() {
                 <option value="">No devices available</option>
               )}
             </select>
+
+            {/* Baud Rate: */}
+            <label
+              htmlFor="baud-rate"
+              className="block mb-2 font-bold text-ctp-text text-right content-center"
+            >
+              Baud Rate:
+            </label>
+            <select
+              id="baud-rate"
+              className="col-span-2 bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
+            >
+              <option>110</option>
+              <option>300</option>
+              <option>1200</option>
+              <option>2400</option>
+              <option>4800</option>
+              <option selected>9600</option>
+              <option>14400</option>
+              <option>19200</option>
+              <option>38400</option>
+              <option>57600</option>
+              <option>115200</option>
+            </select>
+
+            {/* Data Bits: */}
+            <label
+              htmlFor="data-bits"
+              className="block mb-2 font-bold text-ctp-text text-right content-center"
+            >
+              Data Bits:
+            </label>
+            <select
+              id="data-bits"
+              className="col-span-2 bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
+            >
+              <option>5</option>
+              <option>6</option>
+              <option>7</option>
+              <option selected>8</option>
+            </select>
+
+            {/* Stop Bits: */}
+            <label
+              htmlFor="stop-bits"
+              className="block mb-2 font-bold text-ctp-text text-right content-center"
+            >
+              Stop Bits:
+            </label>
+            <select
+              id="stop-bits"
+              className="col-span-2 bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
+            >
+              <option selected>1</option>
+              <option>1.5</option>
+              <option>2</option>
+            </select>
+
+            {/* Parity: */}
+            <label
+              htmlFor="parity"
+              className="block mb-2 font-bold text-ctp-text text-right content-center"
+            >
+              Parity:
+            </label>
+            <select
+              id="parity"
+              className="col-span-2 bg-ctp-surface0 text-ctp-text rounded-md focus:ring-ctp-green focus:border-ctp-green block w-full p-2.5"
+            >
+              <option selected>None</option>
+              <option>Even</option>
+              <option>Odd</option>
+              <option>Mark</option>
+              <option>Space</option>
+            </select>
           </form>
         </div>
       )
     },
     {
-      title: 'Flow Control',
+      title: 'Program',
       content: <div></div>
     }
   ]
@@ -95,9 +171,6 @@ export default function IconMenu() {
             }}
           >
             <div className="select-none">
-              <p className="hidden text-ctp-text text-2xl font-bold text-center">
-                This is setting pop-up
-              </p>
               <Tab tabs={settingTabs} />
             </div>
           </PopUpMenu>
