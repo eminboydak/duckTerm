@@ -1,4 +1,4 @@
-use duckterm_lib::commands::serial::{list_ports, PortInfo};
+use duckterm_lib::commands::serial::{list_ports, open_port, SerialConfig};
 
 #[test]
 fn test_list_ports_returns_vec() {
@@ -27,10 +27,20 @@ fn test_list_ports_returns_unique_ports() {
         let mut names: Vec<&str> = ports.iter().map(|p| p.name.as_str()).collect();
         names.sort();
         names.dedup();
-        assert_eq!(
-            names.len(),
-            ports.len(),
-            "port names should be unique"
-        );
+        assert_eq!(names.len(), ports.len(), "port names should be unique");
     }
+}
+
+#[test]
+fn test_open_port_invalid_returns_error() {
+    let config = SerialConfig::default();
+    let result = open_port("/dev/nonexistent_port_12345", &config);
+    assert!(result.is_err(), "opening invalid port should fail");
+}
+
+#[test]
+fn test_serial_config_from_json() {
+    let json = r#"{"baud_rate":115200,"data_bits":8,"parity":"None","stop_bits":1,"flow_control":"None"}"#;
+    let config: SerialConfig = serde_json::from_str(json).unwrap();
+    assert_eq!(config.baud_rate, 115200);
 }
