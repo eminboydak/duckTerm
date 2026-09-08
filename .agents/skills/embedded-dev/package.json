@@ -1,0 +1,85 @@
+{
+  "name": "embedded-dev-skill",
+  "version": "3.3.0",
+  "description": "Embedded development skill for Pi Coding Agent and OpenCode - supports ESP32, STM32, RP2040, nRF52 with Iron Law, Skill Chain, Two-Stage Review, Cases, FAQ, Serial Monitor, and MCP Server",
+  "keywords": [
+    "pi-package",
+    "pi-skill",
+    "opencode-skill",
+    "opencode",
+    "embedded",
+    "embedded-systems",
+    "esp32",
+    "stm32",
+    "rp2040",
+    "nrf52",
+    "firmware",
+    "driver",
+    "iot",
+    "mcu",
+    "mcp",
+    "mcp-server",
+    "skill-chain",
+    "iron-law",
+    "verification-gate",
+    "misra-c"
+  ],
+  "author": "lhbsaa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lhbsaa/embedded-dev-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lhbsaa/embedded-dev-skill/issues"
+  },
+  "homepage": "https://github.com/lhbsaa/embedded-dev-skill#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "tsc extensions/*.ts --outDir dist --declaration",
+    "lint": "eslint extensions/*.ts",
+    "test": "echo 'No tests yet'"
+  },
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./SKILL.md"],
+    "hooks": "./hooks",
+    "prompts": [],
+    "themes": []
+  },
+  "opencode": {
+    "skill": "./SKILL.md",
+    "skills": "./skills",
+    "mcpServer": "./adapters/opencode/mcp-server-embedded.py",
+    "references": "./references",
+    "scripts": "./scripts",
+    "hooks": "./hooks",
+    "prompts": "./prompts"
+  },
+  "files": [
+    "SKILL.md",
+    "workflow.md",
+    "examples.md",
+    "INSTALL.md",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "COMPATIBILITY.md",
+    "VERSION_HISTORY.md",
+    "extensions/",
+    "adapters/",
+    "hooks/",
+    "prompts/",
+    "skills/",
+    "references/",
+    "scripts/"
+  ]
+}

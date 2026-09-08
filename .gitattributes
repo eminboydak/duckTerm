@@ -1,0 +1,28 @@
+# Auto detect text files and ensure LF line endings
+* text=auto eol=lf
+
+# Explicit text files
+*.md text diff=markdown
+*.txt text
+*.yml text
+*.yaml text
+*.json text
+*.toml text
+*.css text
+*.html text
+*.js text
+*.ts text
+*.svelte text
+*.rs text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.lock binary
