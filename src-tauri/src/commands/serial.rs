@@ -41,46 +41,68 @@ impl AppState {
 }
 
 pub fn list_ports() -> Result<Vec<PortInfo>, String> {
-    let ports = serialport::available_ports().map_err(|e| e.to_string())?;
+    #[cfg(feature = "mock")]
+    {
+        Ok(vec![
+            PortInfo {
+                name: "MOCK-PORT".to_string(),
+                port_type: "MockPort".to_string(),
+            },
+        ])
+    }
 
-    let port_infos: Vec<PortInfo> = ports
-        .into_iter()
-        .map(|p| PortInfo {
-            name: p.port_name,
-            port_type: format!("{:?}", p.port_type),
-        })
-        .collect();
+    #[cfg(not(feature = "mock"))]
+    {
+        let ports = serialport::available_ports().map_err(|e| e.to_string())?;
 
-    Ok(port_infos)
+        let port_infos: Vec<PortInfo> = ports
+            .into_iter()
+            .map(|p| PortInfo {
+                name: p.port_name,
+                port_type: format!("{:?}", p.port_type),
+            })
+            .collect();
+
+        Ok(port_infos)
+    }
 }
 
 pub fn open_port(
     port_name: &str,
     config: &SerialConfig,
 ) -> Result<Box<dyn serialport::SerialPort>, String> {
-    let builder = serialport::new(port_name, config.baud_rate)
-        .data_bits(match config.data_bits {
-            5 => serialport::DataBits::Five,
-            6 => serialport::DataBits::Six,
-            7 => serialport::DataBits::Seven,
-            _ => serialport::DataBits::Eight,
-        })
-        .parity(match config.parity.as_str() {
-            "Even" => serialport::Parity::Even,
-            "Odd" => serialport::Parity::Odd,
-            _ => serialport::Parity::None,
-        })
-        .stop_bits(match config.stop_bits {
-            2 => serialport::StopBits::Two,
-            _ => serialport::StopBits::One,
-        })
-        .flow_control(match config.flow_control.as_str() {
-            "Hardware" => serialport::FlowControl::Hardware,
-            "Software" => serialport::FlowControl::Software,
-            _ => serialport::FlowControl::None,
-        });
+    #[cfg(feature = "mock")]
+    {
+        let _ = (port_name, config);
+        Ok(Box::new(crate::commands::serial_mock::MockPort::new()))
+    }
 
-    builder.open().map_err(|e| e.to_string())
+    #[cfg(not(feature = "mock"))]
+    {
+        let builder = serialport::new(port_name, config.baud_rate)
+            .data_bits(match config.data_bits {
+                5 => serialport::DataBits::Five,
+                6 => serialport::DataBits::Six,
+                7 => serialport::DataBits::Seven,
+                _ => serialport::DataBits::Eight,
+            })
+            .parity(match config.parity.as_str() {
+                "Even" => serialport::Parity::Even,
+                "Odd" => serialport::Parity::Odd,
+                _ => serialport::Parity::None,
+            })
+            .stop_bits(match config.stop_bits {
+                2 => serialport::StopBits::Two,
+                _ => serialport::StopBits::One,
+            })
+            .flow_control(match config.flow_control.as_str() {
+                "Hardware" => serialport::FlowControl::Hardware,
+                "Software" => serialport::FlowControl::Software,
+                _ => serialport::FlowControl::None,
+            });
+
+        builder.open().map_err(|e| e.to_string())
+    }
 }
 
 pub fn write_data(

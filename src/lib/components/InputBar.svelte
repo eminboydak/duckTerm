@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from '@tauri-apps/api/core';
   import { connection } from '$lib/stores/connection';
-  import { terminal, viewMode } from '$lib/stores/terminal';
+  import { terminal } from '$lib/stores/terminal';
   import { hexStringToBytes } from '$lib/utils/hex';
 
   let inputValue = $state('');
@@ -21,7 +21,7 @@
       }
 
       await invoke('write_data', { data: bytes });
-      terminal.addLine('tx', bytes, $viewMode);
+      terminal.addLine('tx', bytes);
       inputValue = '';
     } catch (e) {
       console.error('Send error:', e);

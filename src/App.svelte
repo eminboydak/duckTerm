@@ -6,14 +6,14 @@
   import InputBar from '$lib/components/InputBar.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import StatusBar from '$lib/components/StatusBar.svelte';
-  import { terminal, viewMode } from '$lib/stores/terminal';
+  import { terminal } from '$lib/stores/terminal';
 
   let unlisten: (() => void) | null = null;
 
   onMount(() => {
     const setup = async () => {
       unlisten = await listen<number[]>('serial-data-received', (event) => {
-        terminal.addLine('rx', event.payload, $viewMode);
+        terminal.addLine('rx', event.payload);
       });
     };
     setup();

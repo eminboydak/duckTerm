@@ -1,7 +1,7 @@
 <script lang="ts">
   import { terminal, viewMode } from '$lib/stores/terminal';
   import { settings } from '$lib/stores/settings';
-  import type { TerminalLine } from '$lib/stores/terminal';
+  import type { TerminalLine, ViewMode } from '$lib/stores/terminal';
 
   let terminalEl: HTMLDivElement;
   let autoScroll = $state(true);
@@ -18,10 +18,19 @@
     autoScroll = scrollHeight - scrollTop - clientHeight < 50;
   }
 
-  function formatLine(line: TerminalLine): string {
-    const prefix = line.direction === 'tx' ? '>' : '<';
-    const prefixClass = line.direction === 'tx' ? 'text-primary' : 'text-secondary';
-    return `${prefix} ${line.data}`;
+  function formatForDisplay(rawBytes: number[], mode: ViewMode): string {
+    if (mode === 'hex') {
+      return rawBytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    }
+    if (mode === 'binary') {
+      return rawBytes.map(b => b.toString(2).padStart(8, '0')).join(' ');
+    }
+    return rawBytes.map(b => {
+      if (b >= 32 && b <= 126) return String.fromCharCode(b);
+      if (b === 10) return '↵';
+      if (b === 13) return '↩';
+      return '·';
+    }).join('');
   }
 
   $effect(() => {
@@ -51,7 +60,7 @@
       <span
         class="{line.direction === 'tx' ? 'text-primary' : 'text-secondary'} select-none"
       >{line.direction === 'tx' ? '>' : '<'}</span>
-      <span class="text-base-content">{line.data}</span>
+      <span class="text-base-content">{formatForDisplay(line.rawBytes, $viewMode)}</span>
     </div>
   {/each}
 </div>

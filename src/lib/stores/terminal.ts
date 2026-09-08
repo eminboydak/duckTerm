@@ -4,7 +4,6 @@ export interface TerminalLine {
   id: number;
   timestamp: string;
   direction: 'tx' | 'rx';
-  data: string;
   rawBytes: number[];
 }
 
@@ -23,26 +22,11 @@ function createTerminalStore() {
   return {
     subscribe,
     limit,
-    addLine: (direction: 'tx' | 'rx', rawBytes: number[], viewMode: ViewMode = 'ascii') => {
-      let data: string;
-      if (viewMode === 'hex') {
-        data = rawBytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
-      } else if (viewMode === 'binary') {
-        data = rawBytes.map(b => b.toString(2).padStart(8, '0')).join(' ');
-      } else {
-        data = rawBytes.map(b => {
-          if (b >= 32 && b <= 126) return String.fromCharCode(b);
-          if (b === 10) return '↵';
-          if (b === 13) return '↩';
-          return '·';
-        }).join('');
-      }
-
+    addLine: (direction: 'tx' | 'rx', rawBytes: number[]) => {
       const line: TerminalLine = {
         id: lineId++,
         timestamp: formatTime(),
         direction,
-        data,
         rawBytes
       };
 
