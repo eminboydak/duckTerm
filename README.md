@@ -71,4 +71,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-[MIT](LICENSE) © [Muhammed Emin Boydak](https://github.com/eminboydak)
+[MIT](LICENSE) © [Emin Boydak](https://github.com/eminboydak)
