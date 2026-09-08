@@ -50,19 +50,20 @@ pnpm tauri dev
 
 ```
 duckTerm/
-├── src-tauri/           # Rust backend (Tauri)
-│   ├── src/             # Serial I/O, IPC commands
-│   ├── capabilities/    # Permission definitions
-│   └── icons/           # App icons
-├── src/                 # Svelte frontend
-│   ├── lib/             # Components & stores
-│   └── assets/          # Static assets
-├── docs/                # Documentation
-│   ├── decisions/       # ADRs (DT-XXXX)
-│   ├── specs/           # Technical specifications
-│   └── architecture/    # System diagrams
-├── AGENTS.md            # AI agent guidelines
-└── opencode.json        # OpenCode configuration
+├── src-tauri/              # Rust backend (Tauri)
+│   ├── src/                # Serial I/O, IPC commands
+│   ├── capabilities/       # Permission definitions
+│   └── icons/              # App icons
+├── src/                    # Svelte frontend
+├── docs/                   # Documentation
+│   ├── decisions/          # ADRs (DT-0001, DT-0002, ...)
+│   ├── specs/              # Technical specifications
+│   ├── architecture/       # System diagrams
+│   └── changelog/          # Release history
+├── .agents/skills/         # Vendored AI skills
+├── .opencode/              # Hand-written skills & commands
+├── AGENTS.md               # AI agent guidelines
+└── opencode.json           # OpenCode configuration
 ```
 
 ## Contributing
