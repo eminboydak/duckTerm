@@ -1,28 +1,29 @@
-import { writable } from 'svelte/store';
+import { signal } from '@preact/signals'
 
-export type Theme = 'business' | 'wireframe';
+export type Theme = 'business' | 'wireframe'
 
-function createSettingsStore() {
-  const { subscribe, update, set } = writable({
-    theme: 'business' as Theme,
-    bufferLimit: 10000,
-    fontSize: 14,
-    showTimestamps: true
-  });
-
-  return {
-    subscribe,
-    setTheme: (theme: Theme) => update(s => ({ ...s, theme })),
-    setBufferLimit: (limit: number) => update(s => ({ ...s, bufferLimit: limit })),
-    setFontSize: (size: number) => update(s => ({ ...s, fontSize: size })),
-    toggleTimestamps: () => update(s => ({ ...s, showTimestamps: !s.showTimestamps })),
-    reset: () => set({
-      theme: 'business',
-      bufferLimit: 10000,
-      fontSize: 14,
-      showTimestamps: true
-    })
-  };
+export interface SettingsState {
+  theme: Theme
+  bufferLimit: number
+  fontSize: number
+  showTimestamps: boolean
 }
 
-export const settings = createSettingsStore();
+const initial: SettingsState = {
+  theme: 'business',
+  bufferLimit: 10000,
+  fontSize: 14,
+  showTimestamps: true
+}
+
+export const settingsState = signal<SettingsState>({ ...initial })
+
+export const settings = {
+  setTheme: (theme: Theme) => { settingsState.value = { ...settingsState.value, theme } },
+  setBufferLimit: (limit: number) => { settingsState.value = { ...settingsState.value, bufferLimit: limit } },
+  setFontSize: (size: number) => { settingsState.value = { ...settingsState.value, fontSize: size } },
+  toggleTimestamps: () => {
+    settingsState.value = { ...settingsState.value, showTimestamps: !settingsState.value.showTimestamps }
+  },
+  reset: () => { settingsState.value = { ...initial } }
+}

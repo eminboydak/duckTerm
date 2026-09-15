@@ -17,8 +17,9 @@ ADRs capture significant architectural decisions. They are immutable once accept
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](decisions/0001-tech-stack-selection.md) | Tech Stack Selection (Tauri + Svelte + DaisyUI) | Accepted |
+| [0001](decisions/0001-tech-stack-selection.md) | Tech Stack Selection (Tauri shell + DaisyUI) | Accepted |
 | [0002](decisions/0002-legacy-v0-evaluation.md) | Legacy v0 Evaluation and Fresh Start | Accepted |
+| [0003](decisions/0003-frontend-framework-preact.md) | Frontend Framework — Preact + Signals (amends 0001 frontend row) | Accepted |
 
 ## Quick Links
 

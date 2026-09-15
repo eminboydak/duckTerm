@@ -12,6 +12,7 @@ ADRs follow the MADR-lite format with `DT-XXXX` prefix. Sequential numbering, no
 |-----|-------|------|--------|
 | [0001](0001-tech-stack-selection.md) | Tech Stack Selection (Tauri + Svelte + DaisyUI) | 2026-09-08 | Accepted |
 | [0002](0002-legacy-v0-evaluation.md) | Legacy v0 Evaluation and Fresh Start | 2026-09-08 | Accepted |
+| [0003](0003-frontend-framework-preact.md) | Frontend Framework — Preact + Signals | 2026-09-15 | Accepted |
 
 ## Lifecycle
 
