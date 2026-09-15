@@ -1,46 +1,36 @@
-import { writable, derived } from 'svelte/store';
+import { signal } from '@preact/signals'
 
 export interface TerminalLine {
-  id: number;
-  timestamp: string;
-  direction: 'tx' | 'rx';
-  rawBytes: number[];
+  id: number
+  timestamp: string
+  direction: 'tx' | 'rx'
+  rawBytes: number[]
 }
 
-export type ViewMode = 'ascii' | 'hex' | 'binary';
+export type ViewMode = 'ascii' | 'hex' | 'binary'
 
-let lineId = 0;
+let lineId = 0
 
-function createTerminalStore() {
-  const { subscribe, update, set } = writable<TerminalLine[]>([]);
-  const limit = writable(10000);
+function formatTime(): string {
+  return new Date().toLocaleTimeString('en-US', { hour12: false })
+}
 
-  function formatTime(): string {
-    return new Date().toLocaleTimeString('en-US', { hour12: false });
-  }
+export const terminalLines = signal<TerminalLine[]>([])
+export const terminalLimit = signal(10000)
+export const viewMode = signal<ViewMode>('ascii')
 
-  return {
-    subscribe,
-    limit,
-    addLine: (direction: 'tx' | 'rx', rawBytes: number[]) => {
-      const line: TerminalLine = {
-        id: lineId++,
-        timestamp: formatTime(),
-        direction,
-        rawBytes
-      };
-
-      update(lines => {
-        const newLines = [...lines, line];
-        return newLines.slice(-10000);
-      });
-    },
-    clear: () => {
-      lineId = 0;
-      set([]);
+export const terminal = {
+  addLine: (direction: 'tx' | 'rx', rawBytes: number[]) => {
+    const line: TerminalLine = {
+      id: lineId++,
+      timestamp: formatTime(),
+      direction,
+      rawBytes
     }
-  };
+    terminalLines.value = [...terminalLines.value, line].slice(-terminalLimit.value)
+  },
+  clear: () => {
+    lineId = 0
+    terminalLines.value = []
+  }
 }
-
-export const terminal = createTerminalStore();
-export const viewMode = writable<ViewMode>('ascii');
