@@ -65,7 +65,7 @@ Always provide explicit task descriptions. Never dispatch without clear scope.
 
 - **ADRs** (`docs/ADR/DT-XXXX-*`): Immutable once `Accepted`. Mark old as `Deprecated` or `Superseded`.
 - **Architecture** (`docs/architecture/`): System diagrams, data flow.
-- **Changelog** (`CHANGELOG.md`): Keep-a-Changelog format. Never modify historical entries.
+- **Changelog** (`docs/changelog/CHANGELOG.md`): Keep-a-Changelog format. Never modify historical entries.
 
 Sequential numbering for ADRs (DT-0001, DT-0002...). No gaps. No deletion.
 
