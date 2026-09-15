@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/Tauri-2.x-FFC131?logo=tauri&logoColor=black)](https://v2.tauri.app)
 [![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev)
 [![DaisyUI](https://img.shields.io/badge/DaisyUI-5-5A0EF8)](https://daisyui.com)
-[![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-blue)](<>)
+[![Platform](https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-blue)](https://github.com/eminboydak/duckTerm/releases)
 
 ---
 

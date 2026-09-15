@@ -1,7 +1,27 @@
 {
   "name": "duckterm",
-  "private": true,
+  "private": false,
   "version": "0.1.0",
+  "description": "Free, open-source, cross-platform serial terminal for embedded engineers",
+  "author": "Emin Boydak <https://github.com/eminboydak>",
+  "license": "MIT",
+  "homepage": "https://github.com/eminboydak/duckTerm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eminboydak/duckTerm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eminboydak/duckTerm/issues"
+  },
+  "keywords": [
+    "serial",
+    "terminal",
+    "uart",
+    "embedded",
+    "tauri",
+    "svelte",
+    "rs232"
+  ],
   "packageManager": "pnpm@12.3.4",
   "type": "module",
   "scripts": {
