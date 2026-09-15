@@ -65,7 +65,7 @@ Always provide explicit task descriptions. Never dispatch without clear scope.
 
 - **ADRs** (`docs/ADR/DT-XXXX-*`): Immutable once `Accepted`. Mark old as `Deprecated` or `Superseded`.
 - **Architecture** (`docs/architecture/`): System diagrams, data flow.
-- **Changelog** (`CHANGELOG.md`): Keep-a-Changelog format. Never modify historical entries.
+- **Changelog** (`docs/changelog/CHANGELOG.md`): Keep-a-Changelog format. Never modify historical entries.
 
 Sequential numbering for ADRs (DT-0001, DT-0002...). No gaps. No deletion.
 
@@ -136,7 +136,6 @@ Ponytail is active. Follow the 7-step decision ladder before writing code:
 
 ## References
 
-- Development brief: `duckterm-v2-brief.md`
 - ADR index: `docs/ADR/INDEX.md`
 - Tauri docs: https://v2.tauri.app
 - DaisyUI docs: https://daisyui.com
