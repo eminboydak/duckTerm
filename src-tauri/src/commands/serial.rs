@@ -32,6 +32,10 @@ pub struct AppState {
     pub port: Mutex<Option<Box<dyn serialport::SerialPort>>>,
 }
 
+/// The single fake port owned by the mock backend (`--features mock`).
+#[cfg(feature = "mock")]
+pub const MOCK_PORT_NAME: &str = "mock-0";
+
 impl AppState {
     pub fn new() -> Self {
         Self {
@@ -43,12 +47,10 @@ impl AppState {
 pub fn list_ports() -> Result<Vec<PortInfo>, String> {
     #[cfg(feature = "mock")]
     {
-        Ok(vec![
-            PortInfo {
-                name: "MOCK-PORT".to_string(),
-                port_type: "MockPort".to_string(),
-            },
-        ])
+        Ok(vec![PortInfo {
+            name: MOCK_PORT_NAME.to_string(),
+            port_type: "MockPort".to_string(),
+        }])
     }
 
     #[cfg(not(feature = "mock"))]
@@ -73,8 +75,15 @@ pub fn open_port(
 ) -> Result<Box<dyn serialport::SerialPort>, String> {
     #[cfg(feature = "mock")]
     {
-        let _ = (port_name, config);
-        Ok(Box::new(crate::commands::serial_mock::MockPort::new()))
+        let _ = config;
+        // The mock backend owns exactly one fake port. Anything else is
+        // rejected, mirroring real open() failure on unknown names — this
+        // keeps negative-path tests meaningful under --features mock.
+        if port_name == MOCK_PORT_NAME {
+            Ok(Box::new(crate::commands::serial_mock::MockPort::new()))
+        } else {
+            Err(format!("mock: unknown port '{port_name}'"))
+        }
     }
 
     #[cfg(not(feature = "mock"))]
@@ -179,5 +188,13 @@ mod tests {
         let config = SerialConfig::default();
         let result = open_port("/dev/nonexistent_port_12345", &config);
         assert!(result.is_err(), "opening invalid port should fail");
+    }
+
+    #[cfg(feature = "mock")]
+    #[test]
+    fn test_open_port_mock_name() {
+        let config = SerialConfig::default();
+        let result = open_port(super::MOCK_PORT_NAME, &config);
+        assert!(result.is_ok(), "opening the mock port should succeed");
     }
 }
