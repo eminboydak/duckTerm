@@ -1,5 +1,5 @@
 import { TerminalOutput } from './TerminalOutput'
-import { viewMode, activeTab, tabStore } from '$lib/stores/tabs'
+import { viewMode, monitoringMode, activeTab, tabStore } from '$lib/stores/tabs'
 import { FilterBar } from './FilterBar'
 import { t } from '$lib/i18n'
 
@@ -15,6 +15,7 @@ export function TerminalView() {
           <button class={`btn btn-xs join-item ${mode === 'dump' ? 'btn-active' : ''}`} onClick={() => { viewMode.value = 'dump' }}>Dump</button>
         </div>
         <div class="flex-1"></div>
+        <button class={`btn btn-xs ${monitoringMode.value ? "btn-warning" : "btn-ghost"}`} onClick={() => { monitoringMode.value = !monitoringMode.value }} title="Monitoring Mode — auto-decode incoming data">Monitor</button>
         <button class="btn btn-xs btn-ghost" onClick={() => tabStore.clearLines(activeTab.value.id)}>{t('term.clear')}</button>
       </div>
       <FilterBar />

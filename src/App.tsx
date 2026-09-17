@@ -13,6 +13,7 @@ import { FindBar } from '$lib/components/FindBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { ShortcutsDialog } from '$lib/components/ShortcutsDialog'
+import { isRecording, recordingActions } from '$lib/stores/recording'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
 import { isLogging, logging, generateHtmlLog, generateTextLog, generateBinaryLog } from '$lib/stores/logging'
 import { projectActions, projectPath } from '$lib/stores/project'
@@ -177,6 +178,8 @@ export function App() {
           </button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLog} title="Save HTML Log">HTML</button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLogText} title="Save Text Log">TXT</button>
+          <button class="btn btn-xs btn-ghost" onClick={() => { const csv = recordingActions.exportCsv(); const blob = new Blob([csv], { type: "text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `duckterm-recording-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`; a.click(); URL.revokeObjectURL(url); }} title="Save Recording">CSV</button>
+          <button class={`btn btn-xs ${isRecording.value ? "btn-error" : "btn-ghost"}`} onClick={() => isRecording.value ? recordingActions.stop() : recordingActions.start()} title="Record/Stop Recording">REC</button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveBinaryLog} title="Save Binary Log">BIN</button>
           <div class="divider divider-horizontal h-4"></div>
           <button class="btn btn-xs btn-ghost" onClick={() => setFindOpen(!findOpen)} title="Find (Ctrl+F)">

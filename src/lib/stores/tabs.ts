@@ -60,6 +60,8 @@ export const viewMode = signal<ViewMode>('ascii')
 export const filterPattern = signal<string>('')
 export function setFilterPattern(pattern: string) { filterPattern.value = pattern }
 
+export const monitoringMode = signal<boolean>(false)
+
 export const activeTab = computed(() => {
   return tabs.value.find(t => t.id === activeTabId.value) || tabs.value[0]
 })
