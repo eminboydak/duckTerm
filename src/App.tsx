@@ -7,6 +7,7 @@ import { Sidebar } from '$lib/components/Sidebar'
 import { StatusBar } from '$lib/components/StatusBar'
 import { TabBar } from '$lib/components/TabBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
+import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
 import { isLogging, logging, generateHtmlLog } from '$lib/stores/logging'
 import { t } from '$lib/i18n'
@@ -70,6 +71,7 @@ export function App() {
 
       <StatusBar />
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SequenceEditorDialog />
     </div>
   )
 }

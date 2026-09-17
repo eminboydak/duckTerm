@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { signalState, connection } from '$lib/stores/connection'
 import { activeTab, tabStore } from '$lib/stores/tabs'
 import { t } from '$lib/i18n'
+import { SequencePanel } from './SequencePanel'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
@@ -71,6 +72,7 @@ export function Sidebar() {
           <button class="btn btn-xs btn-ghost justify-start" disabled={!tab.isConnected} onClick={() => tabStore.clearLines(tab.id)}>{t('sidebar.actions.clear')}</button>
         </div>
       </div>
+      <SequencePanel />
     </aside>
   )
 }
