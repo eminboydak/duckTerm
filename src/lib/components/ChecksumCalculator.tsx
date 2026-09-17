@@ -35,21 +35,20 @@ export function ChecksumCalculator() {
   function compute() {
     const bytes = hexToBytes(input)
     if (bytes.length === 0) { setResult(''); return }
-    const cs = calculateChecksum(bytes, algorithm)
-    setResult(bytesToHex(cs))
+    setResult(bytesToHex(calculateChecksum(bytes, algorithm)))
   }
 
   return (
     <div class="border-t border-base-300 p-3">
-      <h4 class="text-xs font-semibold text-base-content/70 uppercase mb-2">Checksum</h4>
+      <h4 class="text-xs font-semibold text-base-content/70 uppercase mb-2">{t('checksum.title')}</h4>
       <select class="select select-xs select-bordered w-full mb-2" value={algorithm} onChange={(e) => { setAlgorithm((e.target as HTMLSelectElement).value as ChecksumAlgorithm); setResult('') }}>
         {ALGORITHMS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
       </select>
-      <input type="text" class="input input-xs input-bordered w-full font-mono mb-2" placeholder="HEX data: 48 65 6C 6C 6F" value={input} onInput={(e) => setInput((e.target as HTMLInputElement).value)} />
-      <button class="btn btn-xs btn-primary w-full mb-2" onClick={compute}>Calculate</button>
+      <input type="text" class="input input-xs input-bordered w-full font-mono mb-2" placeholder={t('checksum.placeholder')} value={input} onInput={(e) => setInput((e.target as HTMLInputElement).value)} />
+      <button class="btn btn-xs btn-primary w-full mb-2" onClick={compute}>{t('checksum.calculate')}</button>
       {result && (
         <div class="bg-base-200 rounded p-2 font-mono text-xs text-center">
-          <span class="text-base-content/50">Result: </span>
+          <span class="text-base-content/50">{t('checksum.result')}: </span>
           <span class="text-primary font-bold">{result}</span>
         </div>
       )}

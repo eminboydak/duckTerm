@@ -4,13 +4,15 @@ export type Lang = 'tr' | 'en'
 
 const translations: Record<Lang, Record<string, string>> = {
   en: {
-    // App
     'app.title': 'duckTerm',
     // Header
     'header.log.start': 'Start Log',
     'header.log.stop': 'Stop Log',
     'header.log.save': 'Save Log',
     'header.settings': 'Settings',
+    'header.find': 'Find',
+    'header.saveProject': 'Save Project',
+    'header.loadProject': 'Load Project',
     // ConnectionBar
     'conn.port.select': 'Select port',
     'conn.connect': 'Connect',
@@ -49,15 +51,37 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.buffer': 'Buffer Limit',
     'settings.lines': 'lines',
     'settings.close': 'Close',
+    // Find
+    'find.placeholder.text': 'Search...',
+    'find.placeholder.hex': '48 65 6C',
+    'find.matches': 'matches',
+    // Sequences
+    'seq.send': 'Send Sequences',
+    'seq.receive': 'Receive Sequences',
+    'seq.new': 'New Sequence',
+    'seq.edit': 'Edit Sequence',
+    'seq.name': 'Name',
+    'seq.format': 'Data Format',
+    'seq.data': 'Data',
+    'seq.cancel': 'Cancel',
+    'seq.save': 'Save',
+    'seq.empty': 'No sequences yet',
+    // Checksum
+    'checksum.title': 'Checksum',
+    'checksum.calculate': 'Calculate',
+    'checksum.result': 'Result',
+    'checksum.placeholder': 'HEX data: 48 65 6C 6C 6F',
   },
   tr: {
-    // App
     'app.title': 'duckTerm',
     // Header
     'header.log.start': 'Log Başlat',
     'header.log.stop': 'Log Durdur',
     'header.log.save': 'Kaydet',
     'header.settings': 'Ayarlar',
+    'header.find': 'Ara',
+    'header.saveProject': 'Projeyi Kaydet',
+    'header.loadProject': 'Proje Yükle',
     // ConnectionBar
     'conn.port.select': 'Port seçin',
     'conn.connect': 'Bağlan',
@@ -96,6 +120,26 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.buffer': 'Tampon Boyutu',
     'settings.lines': 'satır',
     'settings.close': 'Kapat',
+    // Find
+    'find.placeholder.text': 'Ara...',
+    'find.placeholder.hex': '48 65 6C',
+    'find.matches': 'eşleşme',
+    // Sequences
+    'seq.send': 'Gönderme Sıraları',
+    'seq.receive': 'Alma Sıraları',
+    'seq.new': 'Yeni Sıra',
+    'seq.edit': 'Sırayı Düzenle',
+    'seq.name': 'İsim',
+    'seq.format': 'Veri Formatı',
+    'seq.data': 'Veri',
+    'seq.cancel': 'İptal',
+    'seq.save': 'Kaydet',
+    'seq.empty': 'Henüz sıra yok',
+    // Checksum
+    'checksum.title': 'Checksum',
+    'checksum.calculate': 'Hesapla',
+    'checksum.result': 'Sonuç',
+    'checksum.placeholder': 'HEX veri: 48 65 6C 6C 6F',
   },
 }
 

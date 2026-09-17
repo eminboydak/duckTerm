@@ -11,12 +11,9 @@ export function SequencePanel() {
   async function runSend(seq: { dataRaw: string; format: string }) {
     if (!tab.isConnected) return
     try {
-      let bytes: number[]
-      if (seq.format === 'hex') {
-        bytes = seq.dataRaw.replace(/\s/g, '').match(/.{1,2}/g)?.map(h => parseInt(h, 16)) || []
-      } else {
-        bytes = Array.from(new TextEncoder().encode(seq.dataRaw))
-      }
+      let bytes: number[] = seq.format === 'hex'
+        ? seq.dataRaw.replace(/\s/g, '').match(/.{1,2}/g)?.map(h => parseInt(h, 16)) || []
+        : Array.from(new TextEncoder().encode(seq.dataRaw))
       await invoke('write_data', { data: bytes })
       tabStore.addLine(tab.id, 'tx', bytes)
     } catch (e) { console.error('Send sequence error:', e) }
@@ -24,36 +21,31 @@ export function SequencePanel() {
 
   return (
     <div class="border-t border-base-300 p-3">
-      {/* Send Sequences */}
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1.5">
-          <h4 class="text-xs font-semibold text-base-content/70 uppercase">Send Sequences</h4>
+          <h4 class="text-xs font-semibold text-base-content/70 uppercase">{t('seq.send')}</h4>
           <button class="btn btn-xs btn-ghost" onClick={() => sequenceStore.openEditor('send')}>+</button>
         </div>
         {sends.length === 0 ? (
-          <div class="text-xs text-base-content/30">No sequences yet</div>
+          <div class="text-xs text-base-content/30">{t('seq.empty')}</div>
         ) : (
           <div class="space-y-1">
-            {sends.map((seq, i) => (
+            {sends.map((seq) => (
               <div key={seq.id} class="flex items-center gap-1 group">
-                <button class="btn btn-xs btn-ghost flex-1 justify-start text-xs font-mono truncate" onClick={() => runSend(seq)} title={seq.dataRaw}>
-                  {seq.name}
-                </button>
+                <button class="btn btn-xs btn-ghost flex-1 justify-start text-xs font-mono truncate" onClick={() => runSend(seq)} title={seq.dataRaw}>{seq.name}</button>
                 <button class="btn btn-xs btn-ghost opacity-0 group-hover:opacity-100 px-1" onClick={() => sequenceStore.removeSend(seq.id)}>×</button>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      {/* Receive Sequences */}
       <div>
         <div class="flex items-center justify-between mb-1.5">
-          <h4 class="text-xs font-semibold text-base-content/70 uppercase">Receive Sequences</h4>
+          <h4 class="text-xs font-semibold text-base-content/70 uppercase">{t('seq.receive')}</h4>
           <button class="btn btn-xs btn-ghost" onClick={() => sequenceStore.openEditor('receive')}>+</button>
         </div>
         {receives.length === 0 ? (
-          <div class="text-xs text-base-content/30">No sequences yet</div>
+          <div class="text-xs text-base-content/30">{t('seq.empty')}</div>
         ) : (
           <div class="space-y-1">
             {receives.map((seq) => (
