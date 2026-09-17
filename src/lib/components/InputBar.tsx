@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks'
+import { useState, useEffect } from 'preact/hooks'
 import { invoke } from '@tauri-apps/api/core'
 import { activeTab, tabStore } from '$lib/stores/tabs'
 import { hexStringToBytes } from '$lib/utils/hex'
@@ -9,6 +9,16 @@ export function InputBar() {
   const [inputMode, setInputMode] = useState<'text' | 'hex'>('text')
   const [sending, setSending] = useState(false)
   const tab = activeTab.value
+
+  // Listen for paste from terminal
+  useEffect(() => {
+    function handlePaste(e: Event) {
+      const text = (e as CustomEvent).detail as string
+      if (text) setInputValue(prev => prev + text)
+    }
+    window.addEventListener('terminal-paste', handlePaste)
+    return () => window.removeEventListener('terminal-paste', handlePaste)
+  }, [])
 
   async function handleSend() {
     if (!tab.isConnected || !inputValue.trim()) return

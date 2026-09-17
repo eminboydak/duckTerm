@@ -94,3 +94,14 @@ export const logging = {
   },
   getLineCount: () => logLines.value.length,
 }
+
+function lineToText(line: TerminalLine): string {
+  const hex = formatBytesHex(line.rawBytes)
+  const ascii = formatBytesAscii(line.rawBytes)
+  const dir = line.direction === 'tx' ? '>' : '<'
+  return `${line.timestamp} ${dir} HEX: ${hex}  ASCII: ${ascii}`
+}
+
+export function generateTextLog(): string {
+  return logLines.value.map(lineToText).join('\n')
+}

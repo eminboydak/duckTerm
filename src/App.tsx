@@ -12,7 +12,7 @@ import { FindBar } from '$lib/components/FindBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
-import { isLogging, logging, generateHtmlLog } from '$lib/stores/logging'
+import { isLogging, logging, generateHtmlLog, generateTextLog } from '$lib/stores/logging'
 import { projectActions, projectPath } from '$lib/stores/project'
 import { receiveSequences, sendSequences } from '$lib/stores/sequences'
 import { parseHex, scanForMatches } from '$lib/utils/matcher'
@@ -30,6 +30,17 @@ function handleSaveLog() {
   const a = document.createElement('a')
   a.href = url
   a.download = `duckterm-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.html`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleSaveLogText() {
+  const text = generateTextLog()
+  const blob = new Blob([text], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `duckterm-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -139,7 +150,8 @@ export function App() {
             <span class={`w-2 h-2 rounded-full ${isLogging.value ? 'bg-error animate-pulse' : 'bg-base-content/30'}`}></span>
             {isLogging.value ? t('header.log.stop') : t('header.log.start')}
           </button>
-          <button class="btn btn-xs btn-ghost" onClick={handleSaveLog}>{t('header.log.save')}</button>
+          <button class="btn btn-xs btn-ghost" onClick={handleSaveLog} title="Save HTML Log">HTML</button>
+          <button class="btn btn-xs btn-ghost" onClick={handleSaveLogText} title="Save Text Log">TXT</button>
           <div class="divider divider-horizontal h-4"></div>
           <button class="btn btn-xs btn-ghost" onClick={() => setFindOpen(!findOpen)} title="Find (Ctrl+F)">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
