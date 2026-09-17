@@ -49,9 +49,12 @@ if (typeof document !== 'undefined') {
 
 // ── General Settings ────────────────────────────────────────────
 
+export type TimestampFormat = 'iso' | 'time' | 'relative' | 'custom'
+
 export interface SettingsState {
   bufferLimit: number
   showTimestamps: boolean
+  timestampFormat: TimestampFormat
   lang: Lang
 }
 
@@ -62,6 +65,7 @@ const storedLang = typeof localStorage !== 'undefined'
 const initial: SettingsState = {
   bufferLimit: 10000,
   showTimestamps: true,
+  timestampFormat: 'time',
   lang: storedLang,
 }
 
@@ -71,6 +75,9 @@ export const settings = {
   setBufferLimit: (limit: number) => { settingsState.value = { ...settingsState.value, bufferLimit: limit } },
   toggleTimestamps: () => {
     settingsState.value = { ...settingsState.value, showTimestamps: !settingsState.value.showTimestamps }
+  },
+  setTimestampFormat: (fmt: TimestampFormat) => {
+    settingsState.value = { ...settingsState.value, timestampFormat: fmt }
   },
   setLang: (lang: Lang) => {
     settingsState.value = { ...settingsState.value, lang }

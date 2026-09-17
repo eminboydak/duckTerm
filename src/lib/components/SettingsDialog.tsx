@@ -36,6 +36,13 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             <span class="text-sm">{t('settings.timestamps')}</span>
             <input type="checkbox" class="toggle toggle-sm toggle-primary" checked={settingsState.value.showTimestamps} onChange={() => settings.toggleTimestamps()} />
           </div>
+          {settingsState.value.showTimestamps && (
+            <select class="select select-sm select-bordered w-full mt-2" value={settingsState.value.timestampFormat} onChange={(e) => settings.setTimestampFormat((e.target as HTMLSelectElement).value as 'iso' | 'time' | 'relative' | 'custom')}>
+              <option value="time">{t('settings.tsformat.time')}</option>
+              <option value="iso">{t('settings.tsformat.iso')}</option>
+              <option value="relative">{t('settings.tsformat.relative')}</option>
+            </select>
+          )}
         </div>
 
         <div class="mb-5">

@@ -49,6 +49,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.language': 'Language',
     'settings.timestamps': 'Show Timestamps',
     'settings.buffer': 'Buffer Limit',
+    'settings.tsformat.time': 'Time Only',
+    'settings.tsformat.iso': 'ISO 8601',
+    'settings.tsformat.relative': 'Relative',
     'settings.lines': 'lines',
     'settings.close': 'Close',
     // Find
@@ -132,6 +135,9 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.language': 'Dil',
     'settings.timestamps': 'Zaman Damgası Göster',
     'settings.buffer': 'Tampon Boyutu',
+    'settings.tsformat.time': 'Sadece Saat',
+    'settings.tsformat.iso': 'ISO 8601',
+    'settings.tsformat.relative': 'Göreceli',
     'settings.lines': 'satır',
     'settings.close': 'Kapat',
     // Find
