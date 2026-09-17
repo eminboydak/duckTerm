@@ -1,12 +1,9 @@
-use duckterm_lib::commands::serial::{
-    list_ports, open_port, SerialConfig, AppState,
-};
+use duckterm_core::serial::{list_ports, open_port, SerialConfig, AppState};
 
 #[test]
 fn test_list_ports_returns_vec() {
     let result = list_ports();
     assert!(result.is_ok(), "list_ports should succeed");
-
     let ports = result.unwrap();
     assert!(ports.is_empty() || !ports.is_empty(), "ports should be a Vec");
 }
@@ -59,7 +56,6 @@ fn test_app_state_can_store_port() {
     let _state = AppState::new();
     let config = SerialConfig::default();
     let result = open_port("/dev/nonexistent_port_12345", &config);
-    // Even though open fails, we can verify the state mechanism works
     assert!(result.is_err());
 }
 
@@ -72,7 +68,6 @@ fn test_serial_config_baud_presets() {
         (57600, SerialConfig { baud_rate: 57600, ..Default::default() }),
         (115200, SerialConfig { baud_rate: 115200, ..Default::default() }),
     ];
-
     for (baud, config) in configs {
         assert_eq!(config.baud_rate, baud);
     }
