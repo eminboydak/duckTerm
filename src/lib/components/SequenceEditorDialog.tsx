@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks'
-import { sequenceEditorOpen, editingSequence, sequenceStore, sendSequences, receiveSequences, type DataFormat, type AutoChecksum } from '$lib/stores/sequences'
+import { sequenceEditorOpen, editingSequence, sequenceStore, sendSequences, receiveSequences, type DataFormat, type AutoChecksum, type ReceiveAction } from '$lib/stores/sequences'
 import { t } from '$lib/i18n'
 
 const FORMATS: { value: DataFormat; label: string }[] = [
@@ -21,6 +21,7 @@ export function SequenceEditorDialog() {
   const [useDtr, setUseDtr] = useState(false)
   const [dtrValue, setDtrValue] = useState(true)
   const [autoChecksum, setAutoChecksum] = useState<AutoChecksum>('none')
+  const [action, setAction] = useState<ReceiveAction>('comment')
 
   useEffect(() => {
     if (open) {
@@ -35,10 +36,11 @@ export function SequenceEditorDialog() {
           setUseDtr(!!seq.rtsDtr?.dtr !== undefined && seq.rtsDtr?.dtr !== undefined)
           setDtrValue(seq.rtsDtr?.dtr ?? true)
           setAutoChecksum(seq.autoChecksum || 'none')
+          setAction(seq.action || 'comment')
         }
       } else {
         setName(''); setDataRaw(''); setFormat('hex'); setDelayMs(0)
-        setUseRts(false); setRtsValue(true); setUseDtr(false); setDtrValue(true); setAutoChecksum('none')
+        setUseRts(false); setRtsValue(true); setUseDtr(false); setDtrValue(true); setAutoChecksum('none'); setAction('comment')
       }
     }
   }, [open])
@@ -50,7 +52,7 @@ export function SequenceEditorDialog() {
       ...(useDtr ? { dtr: dtrValue } : {}),
     } : undefined
 
-    const data = { name, dataRaw, format, delayMs: delayMs || undefined, rtsDtr, autoChecksum: autoChecksum !== 'none' ? autoChecksum : undefined }
+    const data = { name, dataRaw, format, delayMs: delayMs || undefined, rtsDtr, autoChecksum: autoChecksum !== 'none' ? autoChecksum : undefined, action }
 
     if (edit) {
       const list = edit.side === 'send' ? sendSequences : receiveSequences
@@ -125,6 +127,7 @@ export function SequenceEditorDialog() {
           )}
         </div>
 
+          {/* Receive Action (receive only) */}          {edit && edit.side === 'receive' && (            <div>              <label class="text-sm font-medium text-base-content/70 mb-1 block">Action</label>              <select class="select select-sm select-bordered w-full" value={action} onChange={(e) => setAction((e.target as HTMLSelectElement).value as ReceiveAction)}>                <option value="comment">Comment</option>                <option value="answer">Answer (Auto-reply)</option>                <option value="stop">Stop Monitoring</option>                <option value="checksum_validate">Checksum Validate</option>              </select>            </div>          )}
           {/* Auto Checksum */}
           <div>
             <label class="text-sm font-medium text-base-content/70 mb-1 block">Auto Checksum</label>

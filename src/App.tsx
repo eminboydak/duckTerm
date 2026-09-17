@@ -98,20 +98,30 @@ function processReceiveData(tabId: string, data: number[]) {
   const matches = scanForMatches(rxBuffer, rules)
 
   for (const match of matches) {
-    // Add comment line
-    tabStore.addLine(tabId, 'rx', Array.from(new TextEncoder().encode(`► ${match.rule.name}`)))
+    const matchedSeq = seqs.find(s => s.id === match.rule.id)
+    const action = matchedSeq?.action || 'comment'
 
-    // Auto-answer: if there's a send sequence with the same name, send it
-    const answerSeq = sendSequences.value.find(s => s.name === match.rule.name)
-    if (answerSeq) {
-      let bytes: number[] = answerSeq.format === 'hex'
-        ? parseHex(answerSeq.dataRaw)
-        : Array.from(new TextEncoder().encode(answerSeq.dataRaw))
-      if (bytes.length > 0) {
-        invoke('write_data', { data: bytes }).then(() => {
-          tabStore.addLine(tabId, 'tx', bytes)
-        }).catch(console.error)
+    if (action === 'comment') {
+      // Log match marker
+      tabStore.addLine(tabId, 'rx', Array.from(new TextEncoder().encode(`► ${match.rule.name}`)))
+    } else if (action === 'answer') {
+      // Auto-answer: find send sequence with same name
+      const answerSeq = sendSequences.value.find(s => s.name === match.rule.name)
+      if (answerSeq) {
+        let bytes: number[] = answerSeq.format === 'hex'
+          ? parseHex(answerSeq.dataRaw)
+          : Array.from(new TextEncoder().encode(answerSeq.dataRaw))
+        if (bytes.length > 0) {
+          invoke('write_data', { data: bytes }).then(() => {
+            tabStore.addLine(tabId, 'tx', bytes)
+          }).catch(console.error)
+        }
       }
+    } else if (action === 'stop') {
+      tabStore.addLine(tabId, 'rx', Array.from(new TextEncoder().encode(`■ STOP: ${match.rule.name}`)))
+      invoke('close_port').then(() => tabStore.updateConnection(tabId, { isConnected: false })).catch(console.error)
+    } else if (action === 'checksum_validate') {
+      tabStore.addLine(tabId, 'rx', Array.from(new TextEncoder().encode(`✓ CHECKSUM: ${match.rule.name}`)))
     }
   }
 }

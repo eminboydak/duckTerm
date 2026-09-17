@@ -3,6 +3,7 @@ import { calculateChecksum, type ChecksumAlgorithm } from '$lib/utils/checksum'
 
 export type DataFormat = 'ascii' | 'hex' | 'decimal' | 'binary'
 export type AutoChecksum = 'none' | 'xor' | 'crc8' | 'crc16' | 'crc16_modbus' | 'lrc'
+export type ReceiveAction = 'comment' | 'answer' | 'stop' | 'checksum_validate'
 
 const AUTO_CHECKSUM_MAP: Record<string, ChecksumAlgorithm> = {
   xor: 'xor',
@@ -20,6 +21,7 @@ export interface SeqSequence {
   delayMs?: number // inter-character delay in ms (0 = none)
   rtsDtr?: { rts?: boolean; dtr?: boolean } // handshake signals to set before send
   autoChecksum?: AutoChecksum // auto-append checksum after data
+  action?: ReceiveAction // action when receive sequence matches (default: 'comment')
 }
 
 export const sendSequences = signal<SeqSequence[]>([])
