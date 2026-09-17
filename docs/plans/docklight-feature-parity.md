@@ -45,8 +45,8 @@
 ### Data Receiving & Sequences
 - [x] Receive Actions (Answer, Comment, Stop, Checksum Validation)
 - [x] Wildcard Matching UI (core hazır)
-- [ ] Handshake Signal Detection
-- [ ] Break State Detection
+- [x] Handshake Signal Detection — rise/fall/change rules
+- [x] Break State Detection — inter-byte gap detector
 
 ### Project Management
 - [x] Project Save/Load — `.duck` formatı, native dialog
