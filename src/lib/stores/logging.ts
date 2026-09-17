@@ -105,3 +105,14 @@ function lineToText(line: TerminalLine): string {
 export function generateTextLog(): string {
   return logLines.value.map(lineToText).join('\n')
 }
+
+export function generateBinaryLog(): Uint8Array {
+  // Raw binary: just all received bytes concatenated
+  const allBytes: number[] = []
+  for (const line of logLines.value) {
+    if (line.direction === 'rx') {
+      allBytes.push(...line.rawBytes)
+    }
+  }
+  return new Uint8Array(allBytes)
+}

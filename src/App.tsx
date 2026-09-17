@@ -12,7 +12,7 @@ import { FindBar } from '$lib/components/FindBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
-import { isLogging, logging, generateHtmlLog, generateTextLog } from '$lib/stores/logging'
+import { isLogging, logging, generateHtmlLog, generateTextLog, generateBinaryLog } from '$lib/stores/logging'
 import { projectActions, projectPath } from '$lib/stores/project'
 import { receiveSequences, sendSequences } from '$lib/stores/sequences'
 import { parseHex, scanForMatches } from '$lib/utils/matcher'
@@ -41,6 +41,17 @@ function handleSaveLogText() {
   const a = document.createElement('a')
   a.href = url
   a.download = `duckterm-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleSaveBinaryLog() {
+  const bin = generateBinaryLog()
+  const blob = new Blob([new Uint8Array(bin)], { type: 'application/octet-stream' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `duckterm-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.bin`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -153,6 +164,7 @@ export function App() {
           </button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLog} title="Save HTML Log">HTML</button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLogText} title="Save Text Log">TXT</button>
+          <button class="btn btn-xs btn-ghost" onClick={handleSaveBinaryLog} title="Save Binary Log">BIN</button>
           <div class="divider divider-horizontal h-4"></div>
           <button class="btn btn-xs btn-ghost" onClick={() => setFindOpen(!findOpen)} title="Find (Ctrl+F)">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
