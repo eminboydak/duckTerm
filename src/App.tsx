@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks'
 import { listen } from '@tauri-apps/api/event'
+import { save, open } from '@tauri-apps/plugin-dialog'
 import { ConnectionBar } from '$lib/components/ConnectionBar'
 import { TerminalView } from '$lib/components/TerminalView'
 import { InputBar } from '$lib/components/InputBar'
@@ -10,6 +11,7 @@ import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
 import { isLogging, logging, generateHtmlLog } from '$lib/stores/logging'
+import { projectActions, projectPath } from '$lib/stores/project'
 import { t } from '$lib/i18n'
 
 function handleLogToggle() {
@@ -26,6 +28,22 @@ function handleSaveLog() {
   a.download = `duckterm-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.html`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+async function handleSaveProject() {
+  const path = projectPath.value || await save({
+    defaultPath: 'project.duck',
+    filters: [{ name: 'duckTerm Project', extensions: ['duck'] }],
+  })
+  if (path) await projectActions.save(path)
+}
+
+async function handleLoadProject() {
+  const path = await open({
+    filters: [{ name: 'duckTerm Project', extensions: ['duck'] }],
+    multiple: false,
+  })
+  if (path) await projectActions.load(path)
 }
 
 export function App() {
@@ -45,15 +63,33 @@ export function App() {
         <div class="flex items-center gap-2">
           <span class="text-xl">🦆</span>
           <h1 class="text-lg font-bold text-base-content">{t('app.title')}</h1>
+          {projectPath.value && (
+            <span class="text-xs text-base-content/40 font-mono">{projectPath.value.split('/').pop()}</span>
+          )}
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1">
+          {/* Project */}
+          <button class="btn btn-xs btn-ghost" onClick={handleSaveProject} title="Save Project (.duck)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+          </button>
+          <button class="btn btn-xs btn-ghost" onClick={handleLoadProject} title="Load Project (.duck)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
+          </button>
+
+          <div class="divider divider-horizontal h-4"></div>
+
+          {/* Log */}
           <button class={`btn btn-xs gap-1 ${isLogging.value ? 'btn-error' : 'btn-ghost'}`} onClick={handleLogToggle}>
             <span class={`w-2 h-2 rounded-full ${isLogging.value ? 'bg-error animate-pulse' : 'bg-base-content/30'}`}></span>
             {isLogging.value ? t('header.log.stop') : t('header.log.start')}
           </button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLog}>{t('header.log.save')}</button>
+
+          <div class="divider divider-horizontal h-4"></div>
+
+          {/* Settings */}
           <button class="btn btn-xs btn-ghost" onClick={() => setSettingsOpen(true)} title={t('header.settings')}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </header>

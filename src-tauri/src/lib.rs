@@ -1,6 +1,7 @@
 pub mod events;
 
 use duckterm_core::serial::{AppState, PortInfo, SerialConfig, SignalState};
+use duckterm_core::project::Project;
 use std::sync::Arc;
 
 #[tauri::command]
@@ -69,12 +70,27 @@ fn set_dtr(state: tauri::State<'_, Arc<AppState>>, value: bool) -> Result<(), St
     Ok(())
 }
 
+// ── Project Save/Load (.duck) ──────────────────────────────────
+
+#[tauri::command]
+fn save_project(path: String, project: Project) -> Result<(), String> {
+    let bytes = project.to_file_bytes().map_err(|e| e.to_string())?;
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn load_project(path: String) -> Result<Project, String> {
+    let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+    Project::from_bytes(&bytes)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let app_state = Arc::new(AppState::new());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_serialport::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(app_state.clone())
         .invoke_handler(tauri::generate_handler![
             list_ports,
@@ -85,6 +101,8 @@ pub fn run() {
             get_signals,
             set_rts,
             set_dtr,
+            save_project,
+            load_project,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

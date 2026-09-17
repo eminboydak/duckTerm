@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Default capabilities for duckTerm",
   "windows": ["main"],
-  "permissions": ["core:default", "serialport:default"]
+  "permissions": ["core:default", "serialport:default", "dialog:default"]
 }
