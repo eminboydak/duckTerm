@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'preact/hooks'
-import { sequenceEditorOpen, editingSequence, sequenceStore, sendSequences, receiveSequences, type DataFormat } from '$lib/stores/sequences'
+import { sequenceEditorOpen, editingSequence, sequenceStore, sendSequences, receiveSequences, type DataFormat, type AutoChecksum } from '$lib/stores/sequences'
 import { t } from '$lib/i18n'
 
 const FORMATS: { value: DataFormat; label: string }[] = [
@@ -20,6 +20,7 @@ export function SequenceEditorDialog() {
   const [rtsValue, setRtsValue] = useState(true)
   const [useDtr, setUseDtr] = useState(false)
   const [dtrValue, setDtrValue] = useState(true)
+  const [autoChecksum, setAutoChecksum] = useState<AutoChecksum>('none')
 
   useEffect(() => {
     if (open) {
@@ -33,10 +34,11 @@ export function SequenceEditorDialog() {
           setRtsValue(seq.rtsDtr?.rts ?? true)
           setUseDtr(!!seq.rtsDtr?.dtr !== undefined && seq.rtsDtr?.dtr !== undefined)
           setDtrValue(seq.rtsDtr?.dtr ?? true)
+          setAutoChecksum(seq.autoChecksum || 'none')
         }
       } else {
         setName(''); setDataRaw(''); setFormat('hex'); setDelayMs(0)
-        setUseRts(false); setRtsValue(true); setUseDtr(false); setDtrValue(true)
+        setUseRts(false); setRtsValue(true); setUseDtr(false); setDtrValue(true); setAutoChecksum('none')
       }
     }
   }, [open])
@@ -48,7 +50,7 @@ export function SequenceEditorDialog() {
       ...(useDtr ? { dtr: dtrValue } : {}),
     } : undefined
 
-    const data = { name, dataRaw, format, delayMs: delayMs || undefined, rtsDtr }
+    const data = { name, dataRaw, format, delayMs: delayMs || undefined, rtsDtr, autoChecksum: autoChecksum !== 'none' ? autoChecksum : undefined }
 
     if (edit) {
       const list = edit.side === 'send' ? sendSequences : receiveSequences
@@ -122,6 +124,19 @@ export function SequenceEditorDialog() {
             </div>
           )}
         </div>
+
+          {/* Auto Checksum */}
+          <div>
+            <label class="text-sm font-medium text-base-content/70 mb-1 block">Auto Checksum</label>
+            <select class="select select-sm select-bordered w-full" value={autoChecksum} onChange={(e) => setAutoChecksum((e.target as HTMLSelectElement).value as AutoChecksum)}>
+              <option value="none">None</option>
+              <option value="xor">XOR</option>
+              <option value="crc8">CRC-8</option>
+              <option value="crc16">CRC-16</option>
+              <option value="crc16_modbus">CRC-16 MODBUS</option>
+              <option value="lrc">LRC</option>
+            </select>
+          </div>
         <div class="modal-action gap-2">
           <button class="btn btn-sm btn-ghost" onClick={() => sequenceStore.closeEditor()}>{t('seq.cancel')}</button>
           <button class="btn btn-sm btn-primary" onClick={handleSave} disabled={!name.trim()}>{t('seq.save')}</button>

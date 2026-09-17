@@ -1,6 +1,16 @@
 import { signal } from '@preact/signals'
+import { calculateChecksum, type ChecksumAlgorithm } from '$lib/utils/checksum'
 
 export type DataFormat = 'ascii' | 'hex' | 'decimal' | 'binary'
+export type AutoChecksum = 'none' | 'xor' | 'crc8' | 'crc16' | 'crc16_modbus' | 'lrc'
+
+const AUTO_CHECKSUM_MAP: Record<string, ChecksumAlgorithm> = {
+  xor: 'xor',
+  crc8: 'crc8',
+  crc16: 'crc16',
+  crc16_modbus: 'crc16modbus',
+  lrc: 'lrc',
+}
 
 export interface SeqSequence {
   id: string
@@ -9,6 +19,7 @@ export interface SeqSequence {
   format: DataFormat
   delayMs?: number // inter-character delay in ms (0 = none)
   rtsDtr?: { rts?: boolean; dtr?: boolean } // handshake signals to set before send
+  autoChecksum?: AutoChecksum // auto-append checksum after data
 }
 
 export const sendSequences = signal<SeqSequence[]>([])
@@ -48,26 +59,38 @@ export const sequenceStore = {
 }
 
 /// Parse sequence data from any format to bytes
-export function parseSequenceData(raw: string, format: DataFormat): number[] {
+export function parseSequenceData(raw: string, format: DataFormat, autoChecksum?: AutoChecksum): number[] {
+  let bytes: number[]
+
   switch (format) {
     case 'hex': {
       const cleaned = raw.replace(/\s/g, '').replace(/^0x/i, '')
       if (cleaned.length % 2 !== 0) return []
-      const bytes: number[] = []
+      bytes = []
       for (let i = 0; i < cleaned.length; i += 2) {
         const b = parseInt(cleaned.substring(i, i + 2), 16)
         if (isNaN(b)) return []
         bytes.push(b)
       }
-      return bytes
+      break
     }
     case 'ascii':
-      return Array.from(new TextEncoder().encode(raw))
+      bytes = Array.from(new TextEncoder().encode(raw))
+      break
     case 'decimal':
-      return raw.split(/[\s,]+/).map(s => parseInt(s, 10)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+      bytes = raw.split(/[\s,]+/).map(s => parseInt(s, 10)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+      break
     case 'binary':
-      return raw.split(/[\s,]+/).map(s => parseInt(s, 2)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+      bytes = raw.split(/[\s,]+/).map(s => parseInt(s, 2)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+      break
   }
+
+  // Auto-checksum: append calculated checksum bytes to data
+  const algorithm = autoChecksum && autoChecksum !== 'none' ? AUTO_CHECKSUM_MAP[autoChecksum] : undefined
+  if (algorithm && bytes!.length > 0) {
+    return [...bytes!, ...calculateChecksum(bytes!, algorithm)]
+  }
+  return bytes!
 }
 
 /// Convert bytes to hex string

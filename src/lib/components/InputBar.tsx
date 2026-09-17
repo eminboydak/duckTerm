@@ -49,7 +49,7 @@ export function InputBar() {
     if (!seq || !tab.isConnected) return
     setSending(true)
     try {
-      const bytes = parseSequenceData(seq.dataRaw, seq.format)
+      const bytes = parseSequenceData(seq.dataRaw, seq.format, seq.autoChecksum)
       if (seq.delayMs && seq.delayMs > 0) {
         for (let i = 0; i < bytes.length; i++) {
           await invoke('write_data', { data: [bytes[i]] })
