@@ -1,42 +1,41 @@
 import { signal } from '@preact/signals'
 
 export type Theme = string
+export type Lang = 'tr' | 'en'
 
-export const THEME_OPTIONS: { value: Theme; label: string; dark: boolean }[] = [
-  // Dark themes
-  { value: 'night', label: 'Night', dark: true },
-  { value: 'dark', label: 'Dark', dark: true },
-  { value: 'dracula', label: 'Dracula', dark: true },
-  { value: 'forest', label: 'Forest', dark: true },
-  { value: 'black', label: 'Black', dark: true },
-  { value: 'luxury', label: 'Luxury', dark: true },
-  { value: 'synthwave', label: 'Synthwave', dark: true },
-  { value: 'halloween', label: 'Halloween', dark: true },
-  { value: 'business', label: 'Business', dark: true },
-  { value: 'coffee', label: 'Coffee', dark: true },
-  { value: 'dim', label: 'Dim', dark: true },
-  { value: 'nord', label: 'Nord', dark: true },
-  { value: 'sunset', label: 'Sunset', dark: true },
-  // Light themes
-  { value: 'light', label: 'Light', dark: false },
-  { value: 'emerald', label: 'Emerald', dark: false },
-  { value: 'corporate', label: 'Corporate', dark: false },
-  { value: 'wireframe', label: 'Wireframe', dark: false },
-  { value: 'retro', label: 'Retro', dark: false },
-  { value: 'valentine', label: 'Valentine', dark: false },
-  { value: 'garden', label: 'Garden', dark: false },
-  { value: 'aqua', label: 'Aqua', dark: false },
-  { value: 'lofi', label: 'Lofi', dark: false },
-  { value: 'pastel', label: 'Pastel', dark: false },
-  { value: 'fantasy', label: 'Fantasy', dark: false },
-  { value: 'winter', label: 'Winter', dark: false },
+export const THEME_OPTIONS: { value: Theme; label: string }[] = [
+  { value: 'night', label: 'Night' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'dracula', label: 'Dracula' },
+  { value: 'forest', label: 'Forest' },
+  { value: 'black', label: 'Black' },
+  { value: 'luxury', label: 'Luxury' },
+  { value: 'synthwave', label: 'Synthwave' },
+  { value: 'halloween', label: 'Halloween' },
+  { value: 'business', label: 'Business' },
+  { value: 'coffee', label: 'Coffee' },
+  { value: 'dim', label: 'Dim' },
+  { value: 'nord', label: 'Nord' },
+  { value: 'sunset', label: 'Sunset' },
+  { value: 'light', label: 'Light' },
+  { value: 'emerald', label: 'Emerald' },
+  { value: 'corporate', label: 'Corporate' },
+  { value: 'wireframe', label: 'Wireframe' },
+  { value: 'retro', label: 'Retro' },
+  { value: 'valentine', label: 'Valentine' },
+  { value: 'garden', label: 'Garden' },
+  { value: 'aqua', label: 'Aqua' },
+  { value: 'lofi', label: 'Lofi' },
+  { value: 'pastel', label: 'Pastel' },
+  { value: 'fantasy', label: 'Fantasy' },
+  { value: 'winter', label: 'Winter' },
 ]
 
-const stored = typeof localStorage !== 'undefined'
+const storedTheme = typeof localStorage !== 'undefined'
   ? localStorage.getItem('duckterm-theme') || 'night'
   : 'night'
 
-export const currentTheme = signal<Theme>(stored)
+export const currentTheme = signal<Theme>(storedTheme)
 
 export function setTheme(theme: Theme) {
   currentTheme.value = theme
@@ -44,7 +43,6 @@ export function setTheme(theme: Theme) {
   document.documentElement.setAttribute('data-theme', theme)
 }
 
-// Apply on module load
 if (typeof document !== 'undefined') {
   document.documentElement.setAttribute('data-theme', currentTheme.value)
 }
@@ -53,23 +51,30 @@ if (typeof document !== 'undefined') {
 
 export interface SettingsState {
   bufferLimit: number
-  fontSize: number
   showTimestamps: boolean
+  lang: Lang
 }
+
+const storedLang = typeof localStorage !== 'undefined'
+  ? (localStorage.getItem('duckterm-lang') as Lang) || 'en'
+  : 'en'
 
 const initial: SettingsState = {
   bufferLimit: 10000,
-  fontSize: 14,
   showTimestamps: true,
+  lang: storedLang,
 }
 
 export const settingsState = signal<SettingsState>({ ...initial })
 
 export const settings = {
   setBufferLimit: (limit: number) => { settingsState.value = { ...settingsState.value, bufferLimit: limit } },
-  setFontSize: (size: number) => { settingsState.value = { ...settingsState.value, fontSize: size } },
   toggleTimestamps: () => {
     settingsState.value = { ...settingsState.value, showTimestamps: !settingsState.value.showTimestamps }
+  },
+  setLang: (lang: Lang) => {
+    settingsState.value = { ...settingsState.value, lang }
+    localStorage.setItem('duckterm-lang', lang)
   },
   reset: () => { settingsState.value = { ...initial } },
 }

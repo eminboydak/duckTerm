@@ -13,6 +13,7 @@ crate-type = ["lib", "cdylib", "staticlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+duckterm-core = { path = "../crates/duckterm-core" }
 tauri = { version = "2", features = [] }
 tauri-plugin-serialport = "2"
 serde = { version = "1", features = ["derive"] }
@@ -21,7 +22,7 @@ serialport = "4"
 
 [features]
 default = []
-mock = []
+mock = ["duckterm-core/mock"]
 
 [dev-dependencies]
 tempfile = "3"

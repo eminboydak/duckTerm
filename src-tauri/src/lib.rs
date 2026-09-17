@@ -1,12 +1,11 @@
-pub mod commands;
 pub mod events;
 
+use duckterm_core::serial::{AppState, PortInfo, SerialConfig, SignalState};
 use std::sync::Arc;
-use commands::serial::{AppState, SerialConfig, PortInfo};
 
 #[tauri::command]
 fn list_ports() -> Result<Vec<PortInfo>, String> {
-    commands::serial::list_ports()
+    duckterm_core::serial::list_ports()
 }
 
 #[tauri::command]
@@ -15,7 +14,7 @@ fn open_port(
     port_name: String,
     config: SerialConfig,
 ) -> Result<(), String> {
-    let port = commands::serial::open_port(&port_name, &config)?;
+    let port = duckterm_core::serial::open_port(&port_name, &config)?;
     let mut p = state.port.lock().unwrap();
     *p = Some(port);
     Ok(())
@@ -29,19 +28,45 @@ fn close_port(state: tauri::State<'_, Arc<AppState>>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn write_data(
-    state: tauri::State<'_, Arc<AppState>>,
-    data: Vec<u8>,
-) -> Result<usize, String> {
+fn write_data(state: tauri::State<'_, Arc<AppState>>, data: Vec<u8>) -> Result<usize, String> {
     let mut p = state.port.lock().unwrap();
     let port = p.as_mut().ok_or("No port open")?;
-    commands::serial::write_data(port, &data)
+    duckterm_core::serial::write_data(port, &data)
 }
 
 #[tauri::command]
 fn get_port_status(state: tauri::State<'_, Arc<AppState>>) -> Result<bool, String> {
     let p = state.port.lock().unwrap();
     Ok(p.is_some())
+}
+
+// ── Signal Control ──────────────────────────────────────────────
+
+#[tauri::command]
+fn get_signals(state: tauri::State<'_, Arc<AppState>>) -> Result<SignalState, String> {
+    let mut p = state.port.lock().unwrap();
+    let port = p.as_mut().ok_or("No port open")?;
+    let rts = *state.rts.lock().unwrap();
+    let dtr = *state.dtr.lock().unwrap();
+    duckterm_core::serial::get_signals(port, rts, dtr)
+}
+
+#[tauri::command]
+fn set_rts(state: tauri::State<'_, Arc<AppState>>, value: bool) -> Result<(), String> {
+    let mut p = state.port.lock().unwrap();
+    let port = p.as_mut().ok_or("No port open")?;
+    duckterm_core::serial::set_rts(port, value)?;
+    *state.rts.lock().unwrap() = value;
+    Ok(())
+}
+
+#[tauri::command]
+fn set_dtr(state: tauri::State<'_, Arc<AppState>>, value: bool) -> Result<(), String> {
+    let mut p = state.port.lock().unwrap();
+    let port = p.as_mut().ok_or("No port open")?;
+    duckterm_core::serial::set_dtr(port, value)?;
+    *state.dtr.lock().unwrap() = value;
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -56,7 +81,10 @@ pub fn run() {
             open_port,
             close_port,
             write_data,
-            get_port_status
+            get_port_status,
+            get_signals,
+            set_rts,
+            set_dtr,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

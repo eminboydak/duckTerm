@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: business --default, wireframe --preferslight;
+  themes: night --default, dark, dracula, forest, black, luxury, synthwave, halloween, business, coffee, dim, nord, sunset, light --preferslight, emerald, corporate, wireframe, retro, valentine, garden, aqua, lofi, pastel, fantasy, winter, cupcake, bumblebee, autumn, lemonade, cmyk, acid;
 }
 
 @font-face {

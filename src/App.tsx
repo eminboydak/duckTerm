@@ -1,14 +1,14 @@
-import { useEffect } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import { listen } from '@tauri-apps/api/event'
 import { ConnectionBar } from '$lib/components/ConnectionBar'
 import { TerminalView } from '$lib/components/TerminalView'
 import { InputBar } from '$lib/components/InputBar'
 import { Sidebar } from '$lib/components/Sidebar'
 import { StatusBar } from '$lib/components/StatusBar'
+import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { terminal, terminalLines } from '$lib/stores/terminal'
 import { connectionState } from '$lib/stores/connection'
 import { isLogging, logging, generateHtmlLog } from '$lib/stores/logging'
-import { currentTheme, setTheme, THEME_OPTIONS } from '$lib/stores/settings'
 
 function handleLogToggle() {
   if (isLogging.value) {
@@ -30,6 +30,8 @@ function handleSaveLog() {
 }
 
 export function App() {
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   useEffect(() => {
     let unlisten: (() => void) | null = null
     listen<number[]>('serial-data-received', (event) => {
@@ -39,9 +41,6 @@ export function App() {
 
     return () => { unlisten?.() }
   }, [])
-
-  const darkThemes = THEME_OPTIONS.filter(t => t.dark)
-  const lightThemes = THEME_OPTIONS.filter(t => !t.dark)
 
   return (
     <div class="flex flex-col h-screen bg-base-100">
@@ -72,37 +71,14 @@ export function App() {
             Save Log
           </button>
 
-          {/* Theme picker */}
-          <div class="dropdown dropdown-end">
-            <div tabIndex={0} role="button" class="btn btn-xs btn-ghost gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-              Theme
-            </div>
-            <ul tabIndex={0} class="dropdown-content menu bg-base-200 border border-base-300 rounded-box z-50 w-40 p-2 shadow-lg max-h-80 overflow-y-auto">
-              <li class="menu-title text-xs">Dark</li>
-              {darkThemes.map(t => (
-                <li key={t.value}>
-                  <a
-                    class={`text-xs ${currentTheme.value === t.value ? 'active' : ''}`}
-                    onClick={() => setTheme(t.value)}
-                  >
-                    {t.label}
-                  </a>
-                </li>
-              ))}
-              <li class="menu-title text-xs mt-1">Light</li>
-              {lightThemes.map(t => (
-                <li key={t.value}>
-                  <a
-                    class={`text-xs ${currentTheme.value === t.value ? 'active' : ''}`}
-                    onClick={() => setTheme(t.value)}
-                  >
-                    {t.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Settings */}
+          <button
+            class="btn btn-xs btn-ghost"
+            onClick={() => setSettingsOpen(true)}
+            title="Settings"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
         </div>
       </header>
 
@@ -118,6 +94,8 @@ export function App() {
       </main>
 
       <StatusBar />
+
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   )
 }

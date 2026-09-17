@@ -2,6 +2,6 @@
 resolver = "2"
 members = [
     "crates/duckterm-core",
-    "crates/duckterm-gui",
     "crates/duckterm-tui",
+    "src-tauri",
 ]
