@@ -3,6 +3,19 @@ import { activeTab, viewMode, type TerminalLine, type ViewMode } from '$lib/stor
 import { settingsState } from '$lib/stores/settings'
 import { t } from '$lib/i18n'
 
+function formatHexDump(rawBytes: number[]): { hex: string; ascii: string } {
+  const hexParts: string[] = []
+  const asciiParts: string[] = []
+  for (let i = 0; i < rawBytes.length; i += 16) {
+    const chunk = rawBytes.slice(i, i + 16)
+    const hex = chunk.map(b => b.toString(16).padStart(2, '0')).join(' ')
+    const padded = hex.padEnd(48) // 16*3-1
+    const ascii = chunk.map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.').join('')
+    hexParts.push(`${i.toString(16).padStart(8, '0')}  ${padded}  |${ascii}|`)
+  }
+  return { hex: hexParts.join('\n'), ascii: '' }
+}
+
 function formatForDisplay(rawBytes: number[], mode: ViewMode): string {
   if (mode === 'hex') return rawBytes.map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(' ')
   if (mode === 'binary') return rawBytes.map((b) => b.toString(2).padStart(8, '0')).join(' ')
@@ -23,7 +36,11 @@ function Line({ line, mode, showTimestamps }: { line: TerminalLine; mode: ViewMo
     <div class={`flex gap-2 py-0.5 cursor-text ${isMatch ? 'bg-warning/10 border-l-2 border-warning pl-1' : 'hover:bg-base-200/50'}`} data-line-id={line.id}>
       {showTimestamps && <span class="text-base-content/40 select-none">{line.timestamp}</span>}
       <span class={`${line.direction === 'tx' ? 'text-primary' : 'text-secondary'} select-none`}>{line.direction === 'tx' ? '>' : '<'}</span>
-      <span class={`${isMatch ? 'text-warning font-semibold' : 'text-base-content'} select-text`}>{formatForDisplay(line.rawBytes, mode)}</span>
+      {mode === 'dump' ? (
+        <pre class={`${isMatch ? 'text-warning font-semibold' : 'text-base-content'} select-text text-xs leading-tight`}>{formatHexDump(line.rawBytes).hex}</pre>
+      ) : (
+        <span class={`${isMatch ? 'text-warning font-semibold' : 'text-base-content'} select-text`}>{formatForDisplay(line.rawBytes, mode)}</span>
+      )}
     </div>
   )
 }

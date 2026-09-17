@@ -11,6 +11,7 @@ export function TerminalView() {
           <button class={`btn btn-xs join-item ${mode === 'ascii' ? 'btn-active' : ''}`} onClick={() => { viewMode.value = 'ascii' }}>ASCII</button>
           <button class={`btn btn-xs join-item ${mode === 'hex' ? 'btn-active' : ''}`} onClick={() => { viewMode.value = 'hex' }}>HEX</button>
           <button class={`btn btn-xs join-item ${mode === 'binary' ? 'btn-active' : ''}`} onClick={() => { viewMode.value = 'binary' }}>Binary</button>
+          <button class={`btn btn-xs join-item ${mode === 'dump' ? 'btn-active' : ''}`} onClick={() => { viewMode.value = 'dump' }}>Dump</button>
         </div>
         <div class="flex-1"></div>
         <button class="btn btn-xs btn-ghost" onClick={() => tabStore.clearLines(activeTab.value.id)}>{t('term.clear')}</button>

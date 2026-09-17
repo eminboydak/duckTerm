@@ -25,7 +25,7 @@ export interface TerminalLine {
   matchName?: string // name of the matched sequence
 }
 
-export type ViewMode = 'ascii' | 'hex' | 'binary'
+export type ViewMode = 'ascii' | 'hex' | 'binary' | 'dump'
 
 let lineId = 0
 let tabIdCounter = 0
