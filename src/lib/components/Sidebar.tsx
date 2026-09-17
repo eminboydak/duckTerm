@@ -5,6 +5,8 @@ import { activeTab, tabStore } from '$lib/stores/tabs'
 import { t } from '$lib/i18n'
 import { SequencePanel } from './SequencePanel'
 import { ChecksumCalculator } from './ChecksumCalculator'
+import { SignalRules } from './SignalRules'
+import { signalRules, signalRuleActions } from '$lib/stores/signalRules'
 import { DataPlot } from './DataPlot'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
@@ -79,6 +81,8 @@ export function Sidebar({ onOpenScript }: SidebarProps) {
           <SignalDot label="DSR" value={sig.dsr} />
           <SignalDot label="RI" value={sig.ri} />
           <SignalDot label="CD" value={sig.cd} />
+          <div class="divider my-1"></div>
+          <SignalRules rules={signalRules.value} onAdd={signalRuleActions.add} onRemove={signalRuleActions.remove} onToggle={signalRuleActions.toggle} />
         </div>
       </Section>
 
