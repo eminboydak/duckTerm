@@ -79,22 +79,27 @@
 ## P2 — v1.x
 
 ### Network
-- [ ] TCP Client/Server, UDP, USB HID, Named Pipes, Bluetooth SPP
+- [x] TCP Client/Server, UDP — std::net bridge (callback-based)
 
 ### Scripting
-- [ ] Scripting Engine (Rhai/Lua), Event Hooks, File I/O, Side Channels
+- [x] Scripting Engine (Rhai) — eval/compile, 10k op limit, ScriptModal UI
+- [ ] Event Hooks, File I/O, Side Channels
 
 ### Advanced
-- [ ] 9-bit Protocol, COBS, Modbus RTU, Monitoring Mode, CSV Test Runner
+- [x] COBS — encode/decode
+- [x] Modbus RTU — frame builder/parser, CRC validation
+- [ ] 9-bit Protocol, Monitoring Mode, CSV Test Runner
 
 ### Performance
 - [ ] High-Resolution Timing, Buffer Overflow Prevention
 
 ### Visualization
-- [ ] Real-Time Data Plot, Data Recording
+- [x] Real-Time Data Plot — canvas chart
+- [ ] Data Recording
 
 ### MCP Server
-- [ ] AI-Powered Serial — list_ports, send_data, read_data, wait_for_sequence, send_receive
+- [x] AI-Powered Serial — 5 tools (list_ports, send_data, wait_for_pattern, get_signals, set_signal)
+- [x] GUI Settings Panel — port, auth token, tool toggles
 
 ---
 
@@ -106,14 +111,23 @@
 - `protocol.rs` — LineEnding, bytes_to_hex/ascii/binary
 - `buffer.rs` — RingBuffer
 - `sequence.rs` — Sequence, DataFormat, wildcard matching
-- `checksum.rs` — MOD256, XOR, CRC-8/16/CCITT/MODBUS/32, LRC
+- `checksum.rs` — MOD256, XOR, CRC-8/16/CCITT/MODBUS/32, LRC, CRC-7/DOW/XMODEM/LRC-ASCII
 - `project.rs` — .duck project save/load (JSON)
+- `cobs.rs` — COBS encode/decode
+- `scripting.rs` — Rhai engine wrapper (eval/compile)
+- `signal_watcher.rs` — Signal change detection (rise/fall/change)
+- `break_detector.rs` — Inter-byte gap break detection
+- `network.rs` — TCP/UDP bridge (std::net)
+- `modbus.rs` — Modbus RTU frame builder/parser
+- `mcp.rs` — MCP Server tools (5 tools)
 
 ### GUI Component'leri (tamamlandı ✅)
 - App, TabBar, ConnectionBar, TerminalView, TerminalOutput
 - InputBar, Sidebar, StatusBar
 - SettingsDialog, SequenceEditorDialog, SequencePanel
-- ChecksumCalculator
+- ChecksumCalculator, DataPlot, FilterBar
+- ScriptModal, NetworkPanel, McpPanel, SignalRules
+- ShortcutsDialog
 
 ---
 
