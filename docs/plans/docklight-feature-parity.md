@@ -120,6 +120,24 @@
 - [ ] **Real-Time Data Plot** — gelen sayısal verilerin canlı grafik gösterimi
 - [ ] **Data Recording** — veri kaydı ve geri oynatma
 
+### MCP Server (AI-Powered Serial)
+- [ ] **MCP Server** — Model Context Protocol sunucusu: AI agent'ların serial port ile doğrudan etkileşim kurmasını sağlar
+  - `list_ports` — mevcut portları listele
+  - `open_port` / `close_port` — port aç/kapat
+  - `send_data` — hex veya ASCII veri gönder
+  - `read_data` — gelen veriyi oku (timeout ile)
+  - `get_signals` / `set_signal` — RTS/DTR/CTS/DSR sinyal kontrolü
+  - `start_capture` / `stop_capture` — log yakalama
+  - `send_receive` — gönder + bekle + oku (otomatik test)
+  - `wait_for_sequence` — belirli bir deseni bekle (wildcard destekli)
+- **Kullanım alanları:**
+  - AI agent'lar firmware test edebilir (AT komutları gönderip yanıtları analiz etme)
+  - Otomatik protokol keşfi (response pattern'leri öğrenme)
+  - CI/CD'de serial loopback testleri
+  - LLM destekli debug-asistanı (hata mesajını serial log'dan analiz etme)
+- **Mimari:** `duckterm-mcp` ayrı crate olarak, `duckterm-core`'ü tüketir
+- **Referans:** docklight'ın VBScript engine'inin modern karşılığı
+
 ---
 
 ## Mimari Notlar
