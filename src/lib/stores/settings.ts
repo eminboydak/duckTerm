@@ -32,8 +32,8 @@ export const THEME_OPTIONS: { value: Theme; label: string }[] = [
 ]
 
 const storedTheme = typeof localStorage !== 'undefined'
-  ? localStorage.getItem('duckterm-theme') || 'night'
-  : 'night'
+  ? localStorage.getItem('duckterm-theme') || 'dark'
+  : 'dark'
 
 export const currentTheme = signal<Theme>(storedTheme)
 
