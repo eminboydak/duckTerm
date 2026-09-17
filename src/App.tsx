@@ -11,6 +11,7 @@ import { TabBar } from '$lib/components/TabBar'
 import { FindBar } from '$lib/components/FindBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
+import { ShortcutsDialog } from '$lib/components/ShortcutsDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
 import { isLogging, logging, generateHtmlLog, generateTextLog, generateBinaryLog } from '$lib/stores/logging'
 import { projectActions, projectPath } from '$lib/stores/project'
@@ -190,6 +191,8 @@ export function App() {
       <StatusBar />
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <SequenceEditorDialog />
+      <ShortcutsDialog />
+import { ShortcutsDialog } from '$lib/components/ShortcutsDialog'
     </div>
   )
 }
