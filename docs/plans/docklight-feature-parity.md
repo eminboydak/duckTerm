@@ -32,37 +32,47 @@
 ### Data Display & Representation
 - [x] Kanal Renklendirme — TX (primary), RX (secondary)
 - [x] Control Character Display — ↵, ↩, ·
-- [ ] Communication Filter
+- [x] Communication Filter — regex terminal filtresi
 
 ### Data Sending & Sequences
 - [x] Send Sequences — kaydedilebilir veri dizileri, tıkla ile gönder
 - [x] Receive Sequences — desen tanıma listesi
 - [x] Sequence Editor UI — Sidebar panel + dialog
 - [x] Checksum Calculator — MOD256, XOR, CRC-8/16/CCITT/MODBUS/32, LRC
-- [ ] Send Sequence Wildcards (core hazır)
-- [ ] Automatic Checksum in Sequence
-- [ ] Inter-Character Delays
+- [x] Automatic Checksum in Sequence — XOR/CRC8/CRC16/CRC16MODBUS/LRC
+- [x] Inter-Character Delays — sequence başına delay
 
 ### Data Receiving & Sequences
-- [ ] Receive Actions (Answer, Comment, Trigger, Stop, Checksum Validation)
-- [ ] Wildcard Matching UI (core hazır)
+- [x] Receive Actions (Answer, Comment, Stop, Checksum Validation)
+- [x] Wildcard Matching UI (core hazır)
 - [ ] Handshake Signal Detection
 - [ ] Break State Detection
 
 ### Project Management
 - [x] Project Save/Load — `.duck` formatı, native dialog
 - [x] Multi-Tab — çoklu port bağlantısı
+- [x] Connection Profiles — kaydedilebilir port ayarları
 
 ### Logging & Export
 - [x] HTML Logging — renkli log dosyası
-- [ ] Plain Text Logging
-- [ ] Clipboard Operations
+- [x] Plain Text Logging — TXT export
+- [x] Binary Log Export — ham RX bytes
+- [x] Clipboard Operations — Ctrl+C/V/Shift+C
 
 ### UI
 - [x] DaisyUI Theme Picker — 25 tema
-- [x] TR/EN i18n — 35+ çeviri
-- [ ] Find in Terminal — Ctrl+F
-- [ ] Keyboard Shortcuts
+- [x] TR/EN i18n — 65+ çeviri
+- [x] Find in Terminal — Ctrl+F
+- [x] Keyboard Shortcuts — F1-F8, 11 kısayol
+- [x] Timestamp Format — Time/ISO/Relative
+- [x] Auto Port Refresh — 5sn interval
+- [x] Send History — ↑/↓ ok tuşları
+- [x] Terminal Pause — F8
+- [x] Hex Dump View — offset + ASCII
+- [x] Live Data Rate — StatusBar B/s
+- [x] Data Plot — canvas chart
+- [x] Break State — 250ms break pulse
+- [x] Send File — dosya gönderme
 
 ---
 
