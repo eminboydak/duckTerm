@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import { listen } from '@tauri-apps/api/event'
 import { save, open } from '@tauri-apps/plugin-dialog'
+import { invoke } from '@tauri-apps/api/core'
 import { ConnectionBar } from '$lib/components/ConnectionBar'
 import { TerminalView } from '$lib/components/TerminalView'
 import { InputBar } from '$lib/components/InputBar'
@@ -13,6 +14,8 @@ import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
 import { isLogging, logging, generateHtmlLog } from '$lib/stores/logging'
 import { projectActions, projectPath } from '$lib/stores/project'
+import { receiveSequences, sendSequences } from '$lib/stores/sequences'
+import { parseHex, scanForMatches } from '$lib/utils/matcher'
 import { t } from '$lib/i18n'
 
 function handleLogToggle() {
@@ -47,6 +50,48 @@ async function handleLoadProject() {
   if (path) await projectActions.load(path)
 }
 
+// Buffer for accumulating receive data before matching
+let rxBuffer: number[] = []
+
+function processReceiveData(tabId: string, data: number[]) {
+  tabStore.addLine(tabId, 'rx', Array.from(data))
+
+  // Accumulate for pattern matching
+  rxBuffer.push(...data)
+  // Keep last 4KB for matching
+  if (rxBuffer.length > 4096) rxBuffer = rxBuffer.slice(-4096)
+
+  // Check receive sequences
+  const seqs = receiveSequences.value
+  if (seqs.length === 0) return
+
+  const matches = scanForMatches(rxBuffer, seqs.map(s => ({
+    id: s.id,
+    name: s.name,
+    pattern: s.format === 'hex' ? s.dataRaw : '',
+    action: { type: 'comment' as const, value: `[Match: ${s.name}]` },
+    enabled: true,
+  })).filter(r => r.pattern))
+
+  for (const match of matches) {
+    // Add comment line
+    tabStore.addLine(tabId, 'rx', Array.from(new TextEncoder().encode(`► ${match.rule.name}`)))
+
+    // Auto-answer: if there's a send sequence with the same name, send it
+    const answerSeq = sendSequences.value.find(s => s.name === match.rule.name)
+    if (answerSeq) {
+      let bytes: number[] = answerSeq.format === 'hex'
+        ? parseHex(answerSeq.dataRaw)
+        : Array.from(new TextEncoder().encode(answerSeq.dataRaw))
+      if (bytes.length > 0) {
+        invoke('write_data', { data: bytes }).then(() => {
+          tabStore.addLine(tabId, 'tx', bytes)
+        }).catch(console.error)
+      }
+    }
+  }
+}
+
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [findOpen, setFindOpen] = useState(false)
@@ -54,39 +99,20 @@ export function App() {
   useEffect(() => {
     let unlisten: (() => void) | null = null
     listen<number[]>('serial-data-received', (event) => {
-      tabStore.addLine(activeTabId.value, 'rx', event.payload)
+      processReceiveData(activeTabId.value, event.payload)
     }).then((fn) => { unlisten = fn })
     return () => { unlisten?.() }
   }, [])
 
-  // Global keyboard shortcuts
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
       const isInput = (e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA' || (e.target as HTMLElement)?.tagName === 'SELECT'
-
-      // Ctrl+F — Find
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault()
-        setFindOpen(prev => !prev)
-        return
-      }
-
-      // Escape — Close find bar
-      if (e.key === 'Escape' && findOpen) {
-        setFindOpen(false)
-        return
-      }
-
-      // Don't handle shortcuts when in input fields
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); setFindOpen(prev => !prev); return }
+      if (e.key === 'Escape' && findOpen) { setFindOpen(false); return }
       if (isInput) return
-
-      // F2 — Start Log
       if (e.key === 'F2') { e.preventDefault(); if (!isLogging.value) logging.start() }
-      // F3 — Stop Log
       if (e.key === 'F3') { e.preventDefault(); if (isLogging.value) logging.stop() }
-      // F5 — Start Communication (connect)
       if (e.key === 'F5') { e.preventDefault(); document.querySelector<HTMLElement>('[data-connect-btn]')?.click() }
-      // F6 — Stop Communication (disconnect)
       if (e.key === 'F6') { e.preventDefault(); document.querySelector<HTMLElement>('[data-connect-btn]')?.click() }
     }
     window.addEventListener('keydown', handleKeydown)
@@ -99,9 +125,7 @@ export function App() {
         <div class="flex items-center gap-2">
           <span class="text-xl">🦆</span>
           <h1 class="text-lg font-bold text-base-content">{t('app.title')}</h1>
-          {projectPath.value && (
-            <span class="text-xs text-base-content/40 font-mono">{projectPath.value.split('/').pop()}</span>
-          )}
+          {projectPath.value && <span class="text-xs text-base-content/40 font-mono">{projectPath.value.split('/').pop()}</span>}
         </div>
         <div class="flex items-center gap-1">
           <button class="btn btn-xs btn-ghost" onClick={handleSaveProject} title="Save Project (.duck)">

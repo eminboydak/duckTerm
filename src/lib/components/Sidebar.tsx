@@ -42,7 +42,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside class="w-56 border-l border-base-300 bg-base-200/30 p-4 flex flex-col gap-4 text-sm">
+    <aside class="w-52 border-l border-base-300 bg-base-200/30 p-3 flex flex-col gap-3 text-sm overflow-y-auto">
       <div>
         <h3 class="font-semibold text-base-content mb-2">{t('sidebar.portInfo')}</h3>
         {tab.isConnected ? (
