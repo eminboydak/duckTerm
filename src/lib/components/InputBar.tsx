@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks'
 import { invoke } from '@tauri-apps/api/core'
-import { connectionState } from '$lib/stores/connection'
+import { connectionState, connection, LINE_ENDINGS, type LineEnding } from '$lib/stores/connection'
 import { terminal } from '$lib/stores/terminal'
 import { hexStringToBytes } from '$lib/utils/hex'
 
@@ -8,10 +8,15 @@ export function InputBar() {
   const [inputValue, setInputValue] = useState('')
   const [inputMode, setInputMode] = useState<'text' | 'hex'>('text')
   const [sending, setSending] = useState(false)
-  const connected = connectionState.value.isConnected
+  const conn = connectionState.value
+
+  function getLineEndingBytes(): number[] {
+    const entry = LINE_ENDINGS.find(e => e.value === conn.lineEnding)
+    return entry?.bytes ?? []
+  }
 
   async function handleSend() {
-    if (!connected || !inputValue.trim()) return
+    if (!conn.isConnected || !inputValue.trim()) return
 
     setSending(true)
     try {
@@ -21,6 +26,7 @@ export function InputBar() {
       } else {
         bytes = Array.from(new TextEncoder().encode(inputValue))
       }
+      bytes.push(...getLineEndingBytes())
 
       await invoke('write_data', { data: bytes })
       terminal.addLine('tx', bytes)
@@ -41,7 +47,8 @@ export function InputBar() {
 
   return (
     <div class="flex items-center gap-2 p-2 border-t border-base-300 bg-base-200/50">
-      <div class="join flex-1">
+      {/* Input mode toggle */}
+      <div class="join">
         <button
           class={`btn btn-xs join-item ${inputMode === 'text' ? 'btn-active' : ''}`}
           onClick={() => setInputMode('text')}
@@ -52,6 +59,18 @@ export function InputBar() {
         >HEX</button>
       </div>
 
+      {/* Line ending selector */}
+      <select
+        class="select select-xs w-20"
+        value={conn.lineEnding}
+        onChange={(e) => connection.setLineEnding((e.target as HTMLSelectElement).value as LineEnding)}
+      >
+        {LINE_ENDINGS.map(le => (
+          <option key={le.value} value={le.value}>{le.label}</option>
+        ))}
+      </select>
+
+      {/* Input field */}
       <input
         type="text"
         class="input input-sm flex-1 font-mono"
@@ -59,12 +78,13 @@ export function InputBar() {
         value={inputValue}
         onInput={(e) => setInputValue((e.target as HTMLInputElement).value)}
         onKeyDown={handleKeydown}
-        disabled={!connected}
+        disabled={!conn.isConnected}
       />
 
+      {/* Send button */}
       <button
         class="btn btn-sm btn-primary"
-        disabled={!connected || sending || !inputValue.trim()}
+        disabled={!conn.isConnected || sending || !inputValue.trim()}
         onClick={handleSend}
       >
         {sending && <span class="loading loading-spinner loading-sm"></span>}

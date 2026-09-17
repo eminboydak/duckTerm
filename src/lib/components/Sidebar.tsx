@@ -1,16 +1,63 @@
-import { connectionState } from '$lib/stores/connection'
+import { useEffect, useRef } from 'preact/hooks'
+import { invoke } from '@tauri-apps/api/core'
+import { connectionState, signalState, connection } from '$lib/stores/connection'
+import { terminal } from '$lib/stores/terminal'
 
-function SignalRow({ label }: { label: string }) {
+function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
-    <div class="flex items-center justify-between">
-      <span class="text-base-content/60">{label}</span>
-      <span class="badge badge-sm badge-ghost">—</span>
+    <div
+      class={`flex items-center justify-between ${toggle ? 'cursor-pointer hover:bg-base-300/50 rounded px-1 py-0.5' : ''}`}
+      onClick={toggle}
+    >
+      <span class="text-base-content/60 text-xs">{label}</span>
+      <span class={`w-2.5 h-2.5 rounded-full ${value ? 'bg-success' : 'bg-base-300'}`}></span>
     </div>
   )
 }
 
 export function Sidebar() {
   const conn = connectionState.value
+  const sig = signalState.value
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (conn.isConnected) {
+      pollRef.current = setInterval(async () => {
+        try {
+          const signals = await invoke<{
+            rts: boolean; dtr: boolean; cts: boolean;
+            dsr: boolean; ri: boolean; cd: boolean;
+          }>('get_signals')
+          connection.updateSignals(signals)
+        } catch (e) {
+          console.error('Signal poll error:', e)
+        }
+      }, 500)
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [conn.isConnected])
+
+  async function toggleRts() {
+    try {
+      const newVal = !sig.rts
+      await invoke('set_rts', { value: newVal })
+      connection.updateSignals({ ...sig, rts: newVal })
+    } catch (e) {
+      console.error('RTS toggle error:', e)
+    }
+  }
+
+  async function toggleDtr() {
+    try {
+      const newVal = !sig.dtr
+      await invoke('set_dtr', { value: newVal })
+      connection.updateSignals({ ...sig, dtr: newVal })
+    } catch (e) {
+      console.error('DTR toggle error:', e)
+    }
+  }
 
   return (
     <aside class="w-56 border-l border-base-300 bg-base-200/30 p-4 flex flex-col gap-4 text-sm">
@@ -19,20 +66,20 @@ export function Sidebar() {
         {conn.isConnected ? (
           <div class="space-y-1">
             <div class="flex justify-between">
-              <span class="text-base-content/60">Port</span>
-              <span class="font-mono">{conn.portName}</span>
+              <span class="text-base-content/60 text-xs">Port</span>
+              <span class="font-mono text-xs">{conn.portName}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-base-content/60">Baud</span>
-              <span class="font-mono">{conn.baudRate}</span>
+              <span class="text-base-content/60 text-xs">Baud</span>
+              <span class="font-mono text-xs">{conn.baudRate}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-base-content/60">Config</span>
-              <span class="font-mono">{conn.dataBits}{conn.parity[0]}{conn.stopBits}</span>
+              <span class="text-base-content/60 text-xs">Config</span>
+              <span class="font-mono text-xs">{conn.dataBits}{conn.parity[0]}{conn.stopBits}</span>
             </div>
           </div>
         ) : (
-          <div class="text-base-content/40">Bağlantı yok</div>
+          <div class="text-base-content/40 text-xs">Bağlantı yok</div>
         )}
       </div>
 
@@ -40,11 +87,13 @@ export function Sidebar() {
 
       <div>
         <h3 class="font-semibold text-base-content mb-2">Signals</h3>
-        <div class="space-y-2">
-          <SignalRow label="RTS" />
-          <SignalRow label="DTR" />
-          <SignalRow label="CTS" />
-          <SignalRow label="DSR" />
+        <div class="space-y-1.5">
+          <SignalDot label="RTS" value={sig.rts} toggle={conn.isConnected ? toggleRts : undefined} />
+          <SignalDot label="DTR" value={sig.dtr} toggle={conn.isConnected ? toggleDtr : undefined} />
+          <SignalDot label="CTS" value={sig.cts} />
+          <SignalDot label="DSR" value={sig.dsr} />
+          <SignalDot label="RI" value={sig.ri} />
+          <SignalDot label="CD" value={sig.cd} />
         </div>
       </div>
 
@@ -56,7 +105,11 @@ export function Sidebar() {
           <button class="btn btn-xs btn-ghost justify-start" disabled={!conn.isConnected}>
             Send Break
           </button>
-          <button class="btn btn-xs btn-ghost justify-start" disabled={!conn.isConnected}>
+          <button
+            class="btn btn-xs btn-ghost justify-start"
+            disabled={!conn.isConnected}
+            onClick={() => terminal.clear()}
+          >
             Clear Buffer
           </button>
         </div>
