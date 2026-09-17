@@ -70,6 +70,13 @@ export function ConnectionBar() {
 
   useEffect(() => { loadPorts() }, [])
 
+  // Auto-refresh ports every 5 seconds when not connected
+  useEffect(() => {
+    if (tab.isConnected) return
+    const id = setInterval(loadPorts, 5000)
+    return () => clearInterval(id)
+  }, [tab.isConnected])
+
   return (
     <div class="flex items-center gap-2 p-2 bg-base-200 border-b border-base-300">
       {/* Profile selector */}
