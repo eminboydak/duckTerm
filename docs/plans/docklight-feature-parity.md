@@ -68,7 +68,7 @@
 - [ ] **Binary Data Logging** — NUL bytes ve control characters dahil
 - [ ] **Log Start/Stop Controls** — F2/F3 tuşları veya toolbar
 - [ ] **Clipboard Operations** — Copy/Paste (Ctrl+C/V)
-- [ ] **Project Save/Load** — .duckterm proje dosyası (sequences, settings, documentation)
+- [ ] **Project Save/Load** — `.duck` proje dosyası (sequences, settings, documentation)
 
 ### Protocol Analysis
 - [ ] **Snapshot/Trigger Capture** — tetikleme sonrası veri yakalama
