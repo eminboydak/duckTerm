@@ -6,6 +6,7 @@ import { t } from '$lib/i18n'
 import { SequencePanel } from './SequencePanel'
 import { ChecksumCalculator } from './ChecksumCalculator'
 import { DataPlot } from './DataPlot'
+import { ScriptPanel } from './ScriptPanel'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
@@ -77,6 +78,7 @@ export function Sidebar() {
       <SequencePanel />
       <ChecksumCalculator />
       <DataPlot />
+      <ScriptPanel />
     </aside>
   )
 }

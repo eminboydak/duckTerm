@@ -1,4 +1,5 @@
 pub mod events;
+mod scripting_cmds;
 
 use duckterm_core::serial::{AppState, PortInfo, SerialConfig, SignalState};
 use duckterm_core::project::Project;
@@ -112,6 +113,7 @@ pub fn run() {
             send_break,
             save_project,
             load_project,
+            scripting_cmds::script_run,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
