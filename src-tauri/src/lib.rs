@@ -98,6 +98,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_serialport::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .manage(app_state.clone())
         .invoke_handler(tauri::generate_handler![
             list_ports,

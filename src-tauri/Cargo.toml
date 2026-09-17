@@ -17,6 +17,7 @@ duckterm-core = { path = "../crates/duckterm-core" }
 tauri = { version = "2", features = [] }
 tauri-plugin-serialport = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serialport = "4"
