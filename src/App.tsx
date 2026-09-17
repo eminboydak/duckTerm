@@ -6,6 +6,7 @@ import { ConnectionBar } from '$lib/components/ConnectionBar'
 import { TerminalView } from '$lib/components/TerminalView'
 import { InputBar } from '$lib/components/InputBar'
 import { Sidebar } from '$lib/components/Sidebar'
+import { ScriptModal } from '$lib/components/ScriptPanel'
 import { StatusBar } from '$lib/components/StatusBar'
 import { TabBar } from '$lib/components/TabBar'
 import { FindBar } from '$lib/components/FindBar'
@@ -128,6 +129,7 @@ function processReceiveData(tabId: string, data: number[]) {
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [scriptOpen, setScriptOpen] = useState(false)
   const [findOpen, setFindOpen] = useState(false)
 
   useEffect(() => {
@@ -195,13 +197,14 @@ export function App() {
           <TerminalView />
           <InputBar />
         </div>
-        <Sidebar />
+        <Sidebar onOpenScript={() => setScriptOpen(true)} />
       </main>
 
       <StatusBar />
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <SequenceEditorDialog />
       <ShortcutsDialog />
+      <ScriptModal open={scriptOpen} onClose={() => setScriptOpen(false)} />
     </div>
   )
 }
