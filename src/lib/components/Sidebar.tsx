@@ -8,6 +8,7 @@ import { ChecksumCalculator } from './ChecksumCalculator'
 import { SignalRules } from './SignalRules'
 import { signalRules, signalRuleActions } from '$lib/stores/signalRules'
 import { DataPlot } from './DataPlot'
+import { NetworkPanel } from './NetworkPanel'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
@@ -113,6 +114,9 @@ export function Sidebar({ onOpenScript }: SidebarProps) {
 
       <Section title="Data Plot" defaultOpen={false}>
         <DataPlot />
+      </Section>n
+      <Section title="Network" defaultOpen={false}>
+        <NetworkPanel />
       </Section>
     </aside>
   )

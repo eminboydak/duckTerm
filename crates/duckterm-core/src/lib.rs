@@ -8,6 +8,7 @@ pub mod cobs;
 pub mod scripting;
 pub mod signal_watcher;
 pub mod break_detector;
+pub mod network;
 
 #[cfg(feature = "mock")]
 pub mod serial_mock;

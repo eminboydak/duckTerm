@@ -1,4 +1,5 @@
 pub mod events;
+mod network_cmds;
 mod scripting_cmds;
 
 use duckterm_core::serial::{AppState, PortInfo, SerialConfig, SignalState};
@@ -101,6 +102,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .manage(app_state.clone())
+        .manage(std::sync::Arc::new(network_cmds::TcpBridgeState::new()))
+        .manage(std::sync::Arc::new(network_cmds::UdpBridgeState::new()))
         .invoke_handler(tauri::generate_handler![
             list_ports,
             open_port,
@@ -114,6 +117,10 @@ pub fn run() {
             save_project,
             load_project,
             scripting_cmds::script_run,
+            network_cmds::tcp_bridge_start,
+            network_cmds::tcp_bridge_stop,
+            network_cmds::udp_bridge_start,
+            network_cmds::udp_bridge_stop,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
