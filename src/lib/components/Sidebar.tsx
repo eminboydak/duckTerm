@@ -9,6 +9,7 @@ import { SignalRules } from './SignalRules'
 import { signalRules, signalRuleActions } from '$lib/stores/signalRules'
 import { DataPlot } from './DataPlot'
 import { NetworkPanel } from './NetworkPanel'
+import { McpPanel } from './McpPanel'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
@@ -117,6 +118,9 @@ export function Sidebar({ onOpenScript }: SidebarProps) {
       </Section>n
       <Section title="Network" defaultOpen={false}>
         <NetworkPanel />
+      </Section>
+      <Section title="MCP Server" defaultOpen={false}>
+        <McpPanel />
       </Section>
     </aside>
   )
