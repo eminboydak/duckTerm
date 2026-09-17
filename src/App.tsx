@@ -7,6 +7,7 @@ import { InputBar } from '$lib/components/InputBar'
 import { Sidebar } from '$lib/components/Sidebar'
 import { StatusBar } from '$lib/components/StatusBar'
 import { TabBar } from '$lib/components/TabBar'
+import { FindBar } from '$lib/components/FindBar'
 import { SettingsDialog } from '$lib/components/SettingsDialog'
 import { SequenceEditorDialog } from '$lib/components/SequenceEditorDialog'
 import { tabStore, activeTabId } from '$lib/stores/tabs'
@@ -48,6 +49,7 @@ async function handleLoadProject() {
 
 export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [findOpen, setFindOpen] = useState(false)
 
   useEffect(() => {
     let unlisten: (() => void) | null = null
@@ -56,6 +58,40 @@ export function App() {
     }).then((fn) => { unlisten = fn })
     return () => { unlisten?.() }
   }, [])
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      const isInput = (e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA' || (e.target as HTMLElement)?.tagName === 'SELECT'
+
+      // Ctrl+F — Find
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault()
+        setFindOpen(prev => !prev)
+        return
+      }
+
+      // Escape — Close find bar
+      if (e.key === 'Escape' && findOpen) {
+        setFindOpen(false)
+        return
+      }
+
+      // Don't handle shortcuts when in input fields
+      if (isInput) return
+
+      // F2 — Start Log
+      if (e.key === 'F2') { e.preventDefault(); if (!isLogging.value) logging.start() }
+      // F3 — Stop Log
+      if (e.key === 'F3') { e.preventDefault(); if (isLogging.value) logging.stop() }
+      // F5 — Start Communication (connect)
+      if (e.key === 'F5') { e.preventDefault(); document.querySelector<HTMLElement>('[data-connect-btn]')?.click() }
+      // F6 — Stop Communication (disconnect)
+      if (e.key === 'F6') { e.preventDefault(); document.querySelector<HTMLElement>('[data-connect-btn]')?.click() }
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [findOpen, isLogging.value])
 
   return (
     <div class="flex flex-col h-screen bg-base-100">
@@ -68,33 +104,30 @@ export function App() {
           )}
         </div>
         <div class="flex items-center gap-1">
-          {/* Project */}
           <button class="btn btn-xs btn-ghost" onClick={handleSaveProject} title="Save Project (.duck)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
           </button>
           <button class="btn btn-xs btn-ghost" onClick={handleLoadProject} title="Load Project (.duck)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
           </button>
-
           <div class="divider divider-horizontal h-4"></div>
-
-          {/* Log */}
           <button class={`btn btn-xs gap-1 ${isLogging.value ? 'btn-error' : 'btn-ghost'}`} onClick={handleLogToggle}>
             <span class={`w-2 h-2 rounded-full ${isLogging.value ? 'bg-error animate-pulse' : 'bg-base-content/30'}`}></span>
             {isLogging.value ? t('header.log.stop') : t('header.log.start')}
           </button>
           <button class="btn btn-xs btn-ghost" onClick={handleSaveLog}>{t('header.log.save')}</button>
-
           <div class="divider divider-horizontal h-4"></div>
-
-          {/* Settings */}
+          <button class="btn btn-xs btn-ghost" onClick={() => setFindOpen(!findOpen)} title="Find (Ctrl+F)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
           <button class="btn btn-xs btn-ghost" onClick={() => setSettingsOpen(true)} title={t('header.settings')}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </header>
 
       <TabBar />
+      <FindBar open={findOpen} onClose={() => setFindOpen(false)} />
       <ConnectionBar />
 
       <main class="flex flex-1 overflow-hidden">
