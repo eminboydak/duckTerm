@@ -192,7 +192,6 @@ export function App() {
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <SequenceEditorDialog />
       <ShortcutsDialog />
-import { ShortcutsDialog } from '$lib/components/ShortcutsDialog'
     </div>
   )
 }
