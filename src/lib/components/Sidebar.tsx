@@ -70,7 +70,7 @@ export function Sidebar() {
       <div>
         <h3 class="font-semibold text-base-content mb-2">{t('sidebar.actions')}</h3>
         <div class="flex flex-col gap-1">
-          <button class="btn btn-xs btn-ghost justify-start" disabled={!tab.isConnected}>{t('sidebar.actions.break')}</button>
+          <button class="btn btn-xs btn-ghost justify-start" disabled={!tab.isConnected} onClick={() => invoke('send_break', { durationMs: 250 }).catch(console.error)}>{t('sidebar.actions.break')}</button>
           <button class="btn btn-xs btn-ghost justify-start" disabled={!tab.isConnected} onClick={() => tabStore.clearLines(tab.id)}>{t('sidebar.actions.clear')}</button>
         </div>
       </div>

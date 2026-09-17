@@ -70,6 +70,13 @@ fn set_dtr(state: tauri::State<'_, Arc<AppState>>, value: bool) -> Result<(), St
     Ok(())
 }
 
+#[tauri::command]
+fn send_break(state: tauri::State<'_, Arc<AppState>>, duration_ms: u64) -> Result<(), String> {
+    let mut p = state.port.lock().unwrap();
+    let port = p.as_mut().ok_or("No port open")?;
+    duckterm_core::serial::send_break(port, std::time::Duration::from_millis(duration_ms))
+}
+
 // ── Project Save/Load (.duck) ──────────────────────────────────
 
 #[tauri::command]
@@ -101,6 +108,7 @@ pub fn run() {
             get_signals,
             set_rts,
             set_dtr,
+            send_break,
             save_project,
             load_project,
         ])
