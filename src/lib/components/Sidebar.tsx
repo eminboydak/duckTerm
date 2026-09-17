@@ -115,10 +115,12 @@ export function Sidebar({ onOpenScript }: SidebarProps) {
 
       <Section title="Data Plot" defaultOpen={false}>
         <DataPlot />
-      </Section>n
+      </Section>
+
       <Section title="Network" defaultOpen={false}>
         <NetworkPanel />
       </Section>
+
       <Section title="MCP Server" defaultOpen={false}>
         <McpPanel />
       </Section>
