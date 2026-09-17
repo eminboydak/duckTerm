@@ -76,13 +76,14 @@ function processReceiveData(tabId: string, data: number[]) {
   const seqs = receiveSequences.value
   if (seqs.length === 0) return
 
-  const matches = scanForMatches(rxBuffer, seqs.map(s => ({
+  const rules = seqs.map(s => ({
     id: s.id,
     name: s.name,
-    pattern: s.format === 'hex' ? s.dataRaw : '',
-    action: { type: 'comment' as const, value: `[Match: ${s.name}]` },
+    patternBytes: parseHex(s.format === 'hex' ? s.dataRaw : ''),
     enabled: true,
-  })).filter(r => r.pattern))
+  })).filter(r => r.patternBytes.length > 0)
+
+  const matches = scanForMatches(rxBuffer, rules)
 
   for (const match of matches) {
     // Add comment line

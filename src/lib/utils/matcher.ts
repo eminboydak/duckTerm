@@ -1,15 +1,9 @@
-import type { SeqSequence } from '../stores/sequences'
-
-export interface ReceiveAction {
-  type: 'answer' | 'comment' | 'stop'
-  value?: string // sequence name for answer, text for comment
-}
+import { parseSequenceData, type SeqSequence, type DataFormat } from '../stores/sequences'
 
 export interface ReceiveRule {
   id: string
   name: string
-  pattern: string // hex string to match
-  action: ReceiveAction
+  patternBytes: number[]
   enabled: boolean
 }
 
@@ -19,7 +13,7 @@ export interface MatchResult {
 }
 
 /// Check if a pattern matches at a given position in data.
-/// Pattern supports '?' (any byte) and '#' (zero or one byte).
+/// Pattern supports '?' (0x3F = any byte) and '#' (0x23 = zero or one byte).
 function matchAt(data: number[], pattern: number[], pos: number): boolean {
   let pi = 0
   let di = pos
@@ -30,9 +24,8 @@ function matchAt(data: number[], pattern: number[], pos: number): boolean {
     } else if (pattern[pi] === 0x23) { // '#'
       pi++
       if (di < data.length && (pi >= pattern.length || data[di] === pattern[pi] || pattern[pi] === 0x3F || pattern[pi] === 0x23)) {
-        di++ // consume one byte optionally
+        di++
       }
-      // '#' matches zero — just advance pattern
     } else {
       if (di >= data.length || data[di] !== pattern[pi]) return false
       pi++; di++
@@ -41,47 +34,28 @@ function matchAt(data: number[], pattern: number[], pos: number): boolean {
   return true
 }
 
-/// Parse a hex string into bytes. Supports spaces.
-export function parseHex(hex: string): number[] {
-  const cleaned = hex.replace(/\s/g, '').replace(/^0x/i, '')
-  if (cleaned.length % 2 !== 0) return []
-  const bytes: number[] = []
-  for (let i = 0; i < cleaned.length; i += 2) {
-    const b = parseInt(cleaned.substring(i, i + 2), 16)
-    if (isNaN(b)) return []
-    bytes.push(b)
-  }
-  return bytes
-}
-
-/// Scan data for matches against a set of rules. Returns all matches found.
+/// Scan data for matches against a set of rules.
 export function scanForMatches(data: number[], rules: ReceiveRule[]): MatchResult[] {
   const results: MatchResult[] = []
-  const enabledRules = rules.filter(r => r.enabled)
-
-  for (const rule of enabledRules) {
-    const pattern = parseHex(rule.pattern)
-    if (pattern.length === 0) continue
-
-    for (let i = 0; i <= data.length - pattern.length; i++) {
-      if (matchAt(data, pattern, i)) {
+  for (const rule of rules) {
+    if (!rule.enabled || rule.patternBytes.length === 0) continue
+    for (let i = 0; i <= data.length - rule.patternBytes.length; i++) {
+      if (matchAt(data, rule.patternBytes, i)) {
         results.push({ rule, position: i })
-        break // one match per rule is enough
+        break
       }
     }
   }
-
   return results
 }
 
-/// Convert a receive sequence to a ReceiveRule.
+/// Convert a receive sequence to a ReceiveRule (supports all formats)
 export function sequenceToRule(seq: SeqSequence): ReceiveRule | null {
-  if (seq.format !== 'hex') return null // only hex patterns for now
-  return {
-    id: seq.id,
-    name: seq.name,
-    pattern: seq.dataRaw,
-    action: { type: 'comment', value: `[Match: ${seq.name}]` },
-    enabled: true,
-  }
+  const bytes = parseSequenceData(seq.dataRaw, seq.format)
+  if (bytes.length === 0) return null
+  return { id: seq.id, name: seq.name, patternBytes: bytes, enabled: true }
+}
+
+export function parseHex(hex: string): number[] {
+  return parseSequenceData(hex, 'hex')
 }

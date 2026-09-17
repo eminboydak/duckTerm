@@ -7,6 +7,8 @@ export interface SeqSequence {
   name: string
   dataRaw: string
   format: DataFormat
+  delayMs?: number // inter-character delay in ms (0 = none)
+  rtsDtr?: { rts?: boolean; dtr?: boolean } // handshake signals to set before send
 }
 
 export const sendSequences = signal<SeqSequence[]>([])
@@ -43,4 +45,32 @@ export const sequenceStore = {
     sequenceEditorOpen.value = false
     editingSequence.value = null
   },
+}
+
+/// Parse sequence data from any format to bytes
+export function parseSequenceData(raw: string, format: DataFormat): number[] {
+  switch (format) {
+    case 'hex': {
+      const cleaned = raw.replace(/\s/g, '').replace(/^0x/i, '')
+      if (cleaned.length % 2 !== 0) return []
+      const bytes: number[] = []
+      for (let i = 0; i < cleaned.length; i += 2) {
+        const b = parseInt(cleaned.substring(i, i + 2), 16)
+        if (isNaN(b)) return []
+        bytes.push(b)
+      }
+      return bytes
+    }
+    case 'ascii':
+      return Array.from(new TextEncoder().encode(raw))
+    case 'decimal':
+      return raw.split(/[\s,]+/).map(s => parseInt(s, 10)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+    case 'binary':
+      return raw.split(/[\s,]+/).map(s => parseInt(s, 2)).filter(b => !isNaN(b) && b >= 0 && b <= 255)
+  }
+}
+
+/// Convert bytes to hex string
+export function bytesToHex(bytes: number[]): string {
+  return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ')
 }
