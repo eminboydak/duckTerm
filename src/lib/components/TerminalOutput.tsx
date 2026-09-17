@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'preact/hooks'
-import { activeTab, viewMode, type TerminalLine, type ViewMode } from '$lib/stores/tabs'
+import { activeTab, viewMode, type TerminalLine, type ViewMode, filterPattern } from '$lib/stores/tabs'
 import { settingsState } from '$lib/stores/settings'
 import { t } from '$lib/i18n'
 
@@ -114,7 +114,15 @@ export function TerminalOutput() {
 
   useEffect(() => { if (!paused) scrollToBottom() }, [lines.length, paused])
 
-  const visibleLines = paused ? lines.slice(0, Math.max(0, lines.length - 0)) : lines
+  const filter = filterPattern.value
+  const visibleLines = (paused ? lines.slice(0, Math.max(0, lines.length - 0)) : lines).filter(l => {
+    if (!filter) return true
+    try {
+      const re = new RegExp(filter)
+      const text = new TextDecoder().decode(new Uint8Array(l.rawBytes))
+      return re.test(text)
+    } catch { return true }
+  })
 
   return (
     <>

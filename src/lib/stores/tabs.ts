@@ -57,6 +57,9 @@ export const tabs = signal<Tab[]>([createTab()])
 export const activeTabId = signal<string>(tabs.value[0].id)
 export const viewMode = signal<ViewMode>('ascii')
 
+export const filterPattern = signal<string>('')
+export function setFilterPattern(pattern: string) { filterPattern.value = pattern }
+
 export const activeTab = computed(() => {
   return tabs.value.find(t => t.id === activeTabId.value) || tabs.value[0]
 })

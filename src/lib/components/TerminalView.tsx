@@ -1,5 +1,6 @@
 import { TerminalOutput } from './TerminalOutput'
 import { viewMode, activeTab, tabStore } from '$lib/stores/tabs'
+import { FilterBar } from './FilterBar'
 import { t } from '$lib/i18n'
 
 export function TerminalView() {
@@ -16,6 +17,7 @@ export function TerminalView() {
         <div class="flex-1"></div>
         <button class="btn btn-xs btn-ghost" onClick={() => tabStore.clearLines(activeTab.value.id)}>{t('term.clear')}</button>
       </div>
+      <FilterBar />
       <TerminalOutput />
     </div>
   )
