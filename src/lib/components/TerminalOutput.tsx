@@ -16,7 +16,7 @@ function formatForDisplay(rawBytes: number[], mode: ViewMode): string {
 
 function Line({ line, mode, showTimestamps }: { line: TerminalLine; mode: ViewMode; showTimestamps: boolean }) {
   const isMatch = line.direction === 'rx' && line.rawBytes.length > 0 &&
-    ((line.rawBytes[0] === 0xEF && line.rawBytes[1] === 0x96 && line.rawBytes[2] === 0xBC) || // ► UTF-8
+    ((line.rawBytes[0] === 0xEF && line.rawBytes[1] === 0x96 && line.rawBytes[2] === 0xBC) ||
      (line.rawBytes.length > 2 && String.fromCharCode(...line.rawBytes.slice(0, 3)) === '►'))
 
   return (
@@ -30,6 +30,7 @@ function Line({ line, mode, showTimestamps }: { line: TerminalLine; mode: ViewMo
 
 export function TerminalOutput() {
   const [autoScroll, setAutoScroll] = useState(true)
+  const [paused, setPaused] = useState(false)
   const [copied, setCopied] = useState(false)
   const terminalEl = useRef<HTMLDivElement>(null)
   const tab = activeTab.value
@@ -88,18 +89,29 @@ export function TerminalOutput() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !window.getSelection()?.isCollapsed) { e.preventDefault(); handleCopy(); return }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') { e.preventDefault(); handleCopyAll(); return }
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); handlePaste(); return }
+      if (e.key === 'F8') { e.preventDefault(); setPaused(p => !p); return }
     }
     window.addEventListener('keydown', handleKeydown)
     return () => window.removeEventListener('keydown', handleKeydown)
   }, [handleCopy, handleCopyAll, handlePaste])
 
-  useEffect(() => { scrollToBottom() }, [lines.length])
+  useEffect(() => { if (!paused) scrollToBottom() }, [lines.length, paused])
+
+  const visibleLines = paused ? lines.slice(0, Math.max(0, lines.length - 0)) : lines
 
   return (
     <>
-      <div ref={terminalEl} class="flex-1 overflow-y-auto font-mono text-sm p-4 bg-base-100" role="log" aria-live="polite" onScroll={handleScroll}>
+      <div ref={terminalEl} class="flex-1 overflow-y-auto font-mono text-sm p-4 bg-base-100 relative" role="log" aria-live="polite" onScroll={handleScroll}>
         {lines.length === 0 && <div class="text-base-content/30 text-center mt-8">{t('term.empty')}</div>}
-        {lines.map((line) => <Line key={line.id} line={line} mode={mode} showTimestamps={showTimestamps} />)}
+        {visibleLines.map((line) => <Line key={line.id} line={line} mode={mode} showTimestamps={showTimestamps} />)}
+        {paused && (
+          <div class="sticky bottom-0 flex justify-center">
+            <span class="badge badge-warning badge-sm gap-1 cursor-pointer" onClick={() => setPaused(false)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              PAUSED (F8)
+            </span>
+          </div>
+        )}
       </div>
       {copied && (
         <div class="toast toast-bottom toast-end">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks'
+import { useState, useEffect, useRef } from 'preact/hooks'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { readFile } from '@tauri-apps/plugin-fs'
@@ -7,10 +7,15 @@ import { sendSequences, parseSequenceData } from '$lib/stores/sequences'
 import { hexStringToBytes } from '$lib/utils/hex'
 import { t } from '$lib/i18n'
 
+const sendHistory: string[] = []
+let historyIndex = -1
+
 export function InputBar() {
   const [inputValue, setInputValue] = useState('')
   const [inputMode, setInputMode] = useState<'text' | 'hex'>('text')
   const [sending, setSending] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const tab = activeTab.value
   const sends = sendSequences.value
 
@@ -30,6 +35,10 @@ export function InputBar() {
       let bytes: number[] = inputMode === 'hex' ? hexStringToBytes(inputValue) : Array.from(new TextEncoder().encode(inputValue))
       await invoke('write_data', { data: bytes })
       tabStore.addLine(tab.id, 'tx', bytes)
+      // Add to history (dedup)
+      if (sendHistory[0] !== inputValue) sendHistory.unshift(inputValue)
+      if (sendHistory.length > 50) sendHistory.pop()
+      historyIndex = -1
       setInputValue('')
     } catch (e) { console.error('Send error:', e) }
     finally { setSending(false) }
@@ -68,7 +77,24 @@ export function InputBar() {
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); return }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (sendHistory.length === 0) return
+      if (historyIndex < sendHistory.length - 1) {
+        historyIndex++
+        setInputValue(sendHistory[historyIndex])
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (historyIndex > 0) {
+        historyIndex--
+        setInputValue(sendHistory[historyIndex])
+      } else {
+        historyIndex = -1
+        setInputValue('')
+      }
+    }
   }
 
   return (
@@ -77,7 +103,16 @@ export function InputBar() {
         <button class={`btn btn-xs join-item ${inputMode === 'text' ? 'btn-active' : ''}`} onClick={() => setInputMode('text')}>{t('input.text')}</button>
         <button class={`btn btn-xs join-item ${inputMode === 'hex' ? 'btn-active' : ''}`} onClick={() => setInputMode('hex')}>{t('input.hex')}</button>
       </div>
-      <input type="text" class="input input-sm flex-1 font-mono" placeholder={inputMode === 'hex' ? t('input.placeholder.hex') : t('input.placeholder.text')} value={inputValue} onInput={(e) => setInputValue((e.target as HTMLInputElement).value)} onKeyDown={handleKeydown} disabled={!tab.isConnected} />
+      <div class="relative flex-1">
+        <input ref={inputRef} type="text" class="input input-sm w-full font-mono" placeholder={inputMode === 'hex' ? t('input.placeholder.hex') : t('input.placeholder.text')} value={inputValue} onInput={(e) => setInputValue((e.target as HTMLInputElement).value)} onKeyDown={handleKeydown} onFocus={() => sendHistory.length > 0 && setShowHistory(true)} onBlur={() => setTimeout(() => setShowHistory(false), 150)} disabled={!tab.isConnected} />
+        {showHistory && sendHistory.length > 0 && (
+          <ul class="absolute z-50 bottom-full mb-1 w-full max-h-40 overflow-auto bg-base-100 border border-base-300 rounded-box shadow-lg text-xs font-mono">
+            {sendHistory.slice(0, 20).map((item, i) => (
+              <li key={i} class="px-2 py-1 hover:bg-base-200 cursor-pointer" onClick={() => { setInputValue(item); setShowHistory(false); inputRef.current?.focus() }}>{item.length > 80 ? item.slice(0, 80) + '...' : item}</li>
+            ))}
+          </ul>
+        )}
+      </div>
       <button class="btn btn-sm btn-primary" disabled={!tab.isConnected || sending || !inputValue.trim()} onClick={handleSend}>
         {sending && <span class="loading loading-spinner loading-sm"></span>}
         {t('input.send')}
