@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'preact/hooks'
 import { invoke } from '@tauri-apps/api/core'
+import { open } from '@tauri-apps/plugin-dialog'
+import { readFile } from '@tauri-apps/plugin-fs'
 import { activeTab, tabStore } from '$lib/stores/tabs'
 import { sendSequences, parseSequenceData } from '$lib/stores/sequences'
 import { hexStringToBytes } from '$lib/utils/hex'
@@ -52,6 +54,19 @@ export function InputBar() {
     finally { setSending(false) }
   }
 
+  async function handleSendFile() {
+    const path = await open({ multiple: false })
+    if (!path || !tab.isConnected) return
+    setSending(true)
+    try {
+      const bytes = await readFile(path)
+      const data = Array.from(new Uint8Array(bytes))
+      await invoke('write_data', { data })
+      tabStore.addLine(tab.id, 'tx', data)
+    } catch (e) { console.error('Send file error:', e) }
+    finally { setSending(false) }
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
@@ -73,6 +88,9 @@ export function InputBar() {
           {sends.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
       )}
+      <button class="btn btn-xs btn-ghost" onClick={handleSendFile} disabled={!tab.isConnected} title="Send File">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </button>
     </div>
   )
 }
