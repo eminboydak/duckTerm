@@ -5,12 +5,16 @@ import { t } from '$lib/i18n'
 const ALGORITHMS: { value: ChecksumAlgorithm; label: string }[] = [
   { value: 'mod256', label: 'MOD256' },
   { value: 'xor', label: 'XOR' },
+  { value: 'crc7', label: 'CRC-7' },
   { value: 'crc8', label: 'CRC-8' },
+  { value: 'crc-dow', label: 'CRC-DOW' },
   { value: 'crc16', label: 'CRC-16' },
   { value: 'crc16ccitt', label: 'CRC-CCITT' },
+  { value: 'crc16xmodem', label: 'CRC-XMODEM' },
   { value: 'crc16modbus', label: 'CRC-MODBUS' },
   { value: 'crc32', label: 'CRC-32' },
   { value: 'lrc', label: 'LRC' },
+  { value: 'lrc-ascii', label: 'LRC-ASCII' },
 ]
 
 function hexToBytes(hex: string): number[] {

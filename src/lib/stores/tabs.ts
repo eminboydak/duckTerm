@@ -21,6 +21,8 @@ export interface TerminalLine {
   timestamp: string
   direction: 'tx' | 'rx'
   rawBytes: number[]
+  matched?: boolean // receive sequence matched
+  matchName?: string // name of the matched sequence
 }
 
 export type ViewMode = 'ascii' | 'hex' | 'binary'

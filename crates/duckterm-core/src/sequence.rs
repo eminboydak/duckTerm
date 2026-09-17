@@ -43,12 +43,16 @@ pub enum SequenceAction {
 pub enum ChecksumAlgorithm {
     Mod256,
     Xor,
+    Crc7,
     Crc8,
+    CrcDow,
     Crc16,
     Crc16Ccitt,
+    Crc16Xmodem,
     Crc16Modbus,
     Crc32,
     Lrc,
+    LrcAscii,
 }
 
 impl ChecksumAlgorithm {
@@ -56,12 +60,16 @@ impl ChecksumAlgorithm {
         match self {
             Self::Mod256 => "MOD256",
             Self::Xor => "XOR",
+            Self::Crc7 => "CRC-7",
             Self::Crc8 => "CRC-8",
+            Self::CrcDow => "CRC-DOW",
             Self::Crc16 => "CRC-16",
             Self::Crc16Ccitt => "CRC-CCITT",
+            Self::Crc16Xmodem => "CRC-XMODEM",
             Self::Crc16Modbus => "CRC-MODBUS",
             Self::Crc32 => "CRC-32",
             Self::Lrc => "LRC",
+            Self::LrcAscii => "LRC-ASCII",
         }
     }
 }

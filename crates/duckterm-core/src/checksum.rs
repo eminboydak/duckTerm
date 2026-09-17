@@ -5,12 +5,19 @@ pub fn calculate_checksum(data: &[u8], algorithm: &ChecksumAlgorithm) -> Vec<u8>
     match algorithm {
         ChecksumAlgorithm::Mod256 => vec![mod256(data)],
         ChecksumAlgorithm::Xor => vec![xor(data)],
+        ChecksumAlgorithm::Crc7 => vec![crc7(data)],
         ChecksumAlgorithm::Crc8 => crc8(data).to_be_bytes()[..1].to_vec(),
+        ChecksumAlgorithm::CrcDow => vec![crc_dow(data)],
         ChecksumAlgorithm::Crc16 => crc16(data).to_be_bytes().to_vec(),
         ChecksumAlgorithm::Crc16Ccitt => crc16_ccitt(data).to_be_bytes().to_vec(),
+        ChecksumAlgorithm::Crc16Xmodem => crc16_xmodem(data).to_be_bytes().to_vec(),
         ChecksumAlgorithm::Crc16Modbus => crc16_modbus(data).to_be_bytes().to_vec(),
         ChecksumAlgorithm::Crc32 => crc32(data).to_be_bytes().to_vec(),
         ChecksumAlgorithm::Lrc => vec![lrc(data)],
+        ChecksumAlgorithm::LrcAscii => {
+            let v = lrc(data);
+            format!("{:02X}", v).as_bytes().to_vec()
+        }
     }
 }
 
@@ -114,6 +121,44 @@ fn crc32(data: &[u8]) -> u32 {
         }
     }
     crc ^ 0xFFFFFFFF
+}
+
+fn crc7(data: &[u8]) -> u8 {
+    let mut crc: u8 = 0;
+    for &byte in data {
+        crc ^= byte;
+        for _ in 0..8 {
+            crc = if crc & 0x80 != 0 { (crc << 1) ^ 0x09 } else { crc << 1 };
+            crc &= 0x7F;
+        }
+    }
+    crc
+}
+
+fn crc_dow(data: &[u8]) -> u8 {
+    let mut crc: u8 = 0;
+    for &byte in data {
+        crc ^= byte;
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 { (crc >> 1) ^ 0x8C } else { crc >> 1 };
+        }
+    }
+    crc
+}
+
+fn crc16_xmodem(data: &[u8]) -> u16 {
+    let mut crc: u16 = 0x0000;
+    for &byte in data {
+        crc ^= (byte as u16) << 8;
+        for _ in 0..8 {
+            if crc & 0x8000 != 0 {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    crc
 }
 
 #[cfg(test)]

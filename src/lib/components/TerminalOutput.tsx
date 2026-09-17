@@ -15,11 +15,15 @@ function formatForDisplay(rawBytes: number[], mode: ViewMode): string {
 }
 
 function Line({ line, mode, showTimestamps }: { line: TerminalLine; mode: ViewMode; showTimestamps: boolean }) {
+  const isMatch = line.direction === 'rx' && line.rawBytes.length > 0 &&
+    ((line.rawBytes[0] === 0xEF && line.rawBytes[1] === 0x96 && line.rawBytes[2] === 0xBC) || // ► UTF-8
+     (line.rawBytes.length > 2 && String.fromCharCode(...line.rawBytes.slice(0, 3)) === '►'))
+
   return (
-    <div class="flex gap-2 py-0.5 hover:bg-base-200/50 cursor-text" data-line-id={line.id}>
+    <div class={`flex gap-2 py-0.5 cursor-text ${isMatch ? 'bg-warning/10 border-l-2 border-warning pl-1' : 'hover:bg-base-200/50'}`} data-line-id={line.id}>
       {showTimestamps && <span class="text-base-content/40 select-none">{line.timestamp}</span>}
       <span class={`${line.direction === 'tx' ? 'text-primary' : 'text-secondary'} select-none`}>{line.direction === 'tx' ? '>' : '<'}</span>
-      <span class="text-base-content select-text">{formatForDisplay(line.rawBytes, mode)}</span>
+      <span class={`${isMatch ? 'text-warning font-semibold' : 'text-base-content'} select-text`}>{formatForDisplay(line.rawBytes, mode)}</span>
     </div>
   )
 }
@@ -73,39 +77,17 @@ export function TerminalOutput() {
   const handlePaste = useCallback(async () => {
     try {
       const text = await navigator.clipboard.readText()
-      if (text) {
-        // Dispatch custom event that InputBar can listen to
-        window.dispatchEvent(new CustomEvent('terminal-paste', { detail: text }))
-      }
+      if (text) window.dispatchEvent(new CustomEvent('terminal-paste', { detail: text }))
     } catch (e) { console.error('Paste failed:', e) }
   }, [])
 
-  // Global keyboard shortcuts for terminal
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
       const isInput = (e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA'
       if (isInput) return
-
-      // Ctrl+C — Copy selection
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !window.getSelection()?.isCollapsed) {
-        e.preventDefault()
-        handleCopy()
-        return
-      }
-
-      // Ctrl+Shift+C — Copy all
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
-        e.preventDefault()
-        handleCopyAll()
-        return
-      }
-
-      // Ctrl+V — Paste to input
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        e.preventDefault()
-        handlePaste()
-        return
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !window.getSelection()?.isCollapsed) { e.preventDefault(); handleCopy(); return }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') { e.preventDefault(); handleCopyAll(); return }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); handlePaste(); return }
     }
     window.addEventListener('keydown', handleKeydown)
     return () => window.removeEventListener('keydown', handleKeydown)
@@ -116,12 +98,9 @@ export function TerminalOutput() {
   return (
     <>
       <div ref={terminalEl} class="flex-1 overflow-y-auto font-mono text-sm p-4 bg-base-100" role="log" aria-live="polite" onScroll={handleScroll}>
-        {lines.length === 0 && (
-          <div class="text-base-content/30 text-center mt-8">{t('term.empty')}</div>
-        )}
+        {lines.length === 0 && <div class="text-base-content/30 text-center mt-8">{t('term.empty')}</div>}
         {lines.map((line) => <Line key={line.id} line={line} mode={mode} showTimestamps={showTimestamps} />)}
       </div>
-      {/* Copy toast */}
       {copied && (
         <div class="toast toast-bottom toast-end">
           <div class="alert alert-success text-xs py-1 px-3">
@@ -130,9 +109,7 @@ export function TerminalOutput() {
           </div>
         </div>
       )}
-      {!autoScroll && (
-        <button class="btn btn-sm btn-circle btn-primary absolute bottom-20 right-4 shadow-lg" onClick={scrollToBottom}>↓</button>
-      )}
+      {!autoScroll && <button class="btn btn-sm btn-circle btn-primary absolute bottom-20 right-4 shadow-lg" onClick={scrollToBottom}>↓</button>}
     </>
   )
 }
