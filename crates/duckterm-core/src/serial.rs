@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
+use std::time::Duration;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PortInfo {
@@ -30,6 +31,8 @@ impl Default for SerialConfig {
 
 pub struct AppState {
     pub port: Mutex<Option<Box<dyn serialport::SerialPort>>>,
+    pub rts: Mutex<bool>,
+    pub dtr: Mutex<bool>,
 }
 
 /// The single fake port owned by the mock backend (`--features mock`).
@@ -40,6 +43,8 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             port: Mutex::new(None),
+            rts: Mutex::new(false),
+            dtr: Mutex::new(false),
         }
     }
 }
@@ -128,6 +133,49 @@ pub fn read_data(
     port.read(buf).map_err(|e| e.to_string())
 }
 
+// ── Signal Control ──────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SignalState {
+    pub rts: bool,
+    pub dtr: bool,
+    pub cts: bool,
+    pub dsr: bool,
+    pub ri: bool,
+    pub cd: bool,
+}
+
+pub fn get_signals(
+    port: &mut Box<dyn serialport::SerialPort>,
+    rts_state: bool,
+    dtr_state: bool,
+) -> Result<SignalState, String> {
+    Ok(SignalState {
+        rts: rts_state,
+        dtr: dtr_state,
+        cts: port.read_clear_to_send().map_err(|e| e.to_string())?,
+        dsr: port.read_data_set_ready().map_err(|e| e.to_string())?,
+        ri: port.read_ring_indicator().map_err(|e| e.to_string())?,
+        cd: port.read_carrier_detect().map_err(|e| e.to_string())?,
+    })
+}
+
+pub fn set_rts(port: &mut Box<dyn serialport::SerialPort>, state: bool) -> Result<(), String> {
+    port.write_request_to_send(state)
+        .map_err(|e| e.to_string())
+}
+
+pub fn set_dtr(port: &mut Box<dyn serialport::SerialPort>, state: bool) -> Result<(), String> {
+    port.write_data_terminal_ready(state)
+        .map_err(|e| e.to_string())
+}
+
+pub fn send_break(port: &mut Box<dyn serialport::SerialPort>, duration: Duration) -> Result<(), String> {
+    port.set_break().map_err(|e| e.to_string())?;
+    std::thread::sleep(duration);
+    port.clear_break().map_err(|e| e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -196,5 +244,50 @@ mod tests {
         let config = SerialConfig::default();
         let result = open_port(super::MOCK_PORT_NAME, &config);
         assert!(result.is_ok(), "opening the mock port should succeed");
+    }
+
+    #[cfg(feature = "mock")]
+    #[test]
+    fn test_signal_state_serializable() {
+        let state = super::SignalState {
+            rts: true,
+            dtr: false,
+            cts: true,
+            dsr: false,
+            ri: false,
+            cd: true,
+        };
+        let json = serde_json::to_string(&state).unwrap();
+        assert!(json.contains("\"rts\":true"));
+        assert!(json.contains("\"cd\":true"));
+    }
+
+    #[cfg(feature = "mock")]
+    #[test]
+    fn test_set_rts_on_mock() {
+        let config = SerialConfig::default();
+        let mut port = open_port(super::MOCK_PORT_NAME, &config).unwrap();
+        let result = super::set_rts(&mut port, true);
+        assert!(result.is_ok());
+    }
+
+    #[cfg(feature = "mock")]
+    #[test]
+    fn test_set_dtr_on_mock() {
+        let config = SerialConfig::default();
+        let mut port = open_port(super::MOCK_PORT_NAME, &config).unwrap();
+        let result = super::set_dtr(&mut port, true);
+        assert!(result.is_ok());
+    }
+
+    #[cfg(feature = "mock")]
+    #[test]
+    fn test_get_signals_on_mock() {
+        let config = SerialConfig::default();
+        let mut port = open_port(super::MOCK_PORT_NAME, &config).unwrap();
+        let signals = super::get_signals(&mut port, true, false).unwrap();
+        assert!(signals.rts);
+        assert!(!signals.dtr);
+        assert!(signals.cts); // mock returns true
     }
 }
