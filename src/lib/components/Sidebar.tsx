@@ -4,6 +4,7 @@ import { signalState, connection } from '$lib/stores/connection'
 import { activeTab, tabStore } from '$lib/stores/tabs'
 import { t } from '$lib/i18n'
 import { SequencePanel } from './SequencePanel'
+import { ChecksumCalculator } from './ChecksumCalculator'
 
 function SignalDot({ label, value, toggle }: { label: string; value: boolean; toggle?: () => void }) {
   return (
@@ -73,6 +74,7 @@ export function Sidebar() {
         </div>
       </div>
       <SequencePanel />
+      <ChecksumCalculator />
     </aside>
   )
 }
