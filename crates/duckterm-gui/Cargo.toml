@@ -1,0 +1,27 @@
+[package]
+name = "duckterm-gui"
+version = "0.1.0"
+edition = "2021"
+description = "duckTerm GUI — Tauri-based serial terminal"
+
+[lib]
+name = "duckterm_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+duckterm-core = { path = "../duckterm-core", features = ["mock"] }
+tauri = { version = "2", features = [] }
+tauri-plugin-serialport = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serialport = "4"
+
+[features]
+default = []
+mock = ["duckterm-core/mock"]
+
+[dev-dependencies]
+tempfile = "3"

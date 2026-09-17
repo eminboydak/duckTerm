@@ -4,18 +4,37 @@
 
 ## Core Purpose & Repository Boundaries
 
-**duckTerm** is a free, open-source, cross-platform serial terminal application for embedded engineers and hardware developers. Built with Tauri 2.x + Svelte 5 + DaisyUI v5 + Rust backend.
+**duckTerm** is a free, open-source, cross-platform serial terminal for embedded engineers.
+Two editions: GUI (Tauri 2.x) and TUI (ratatui), sharing a common `duckterm-core` crate.
 
 **This repository contains:**
-- Tauri desktop app (Rust backend + Svelte frontend)
-- Serial communication via `tauri-plugin-serialport`
-- Documentation (ADRs, architecture, guides)
+- `duckterm-core` — shared serial I/O, protocol, buffer, mock backend
+- `duckterm-gui` — Tauri 2.x desktop app (Rust + Preact frontend)
+- `duckterm-tui` — ratatui terminal app (Rust, single binary)
+- `site/` — Landing page (DaisyUI 5, GitHub Pages)
+- Documentation (ADRs, architecture, plans, changelog)
 
 **This repository does NOT contain:**
-- Network (TCP/UDP) serial — future feature
+- Network (TCP/UDP) serial — future P2 feature
 - SSH/Telnet — not a terminal emulator
-- Mobile apps — desktop first
+- Mobile apps — desktop + terminal first
 - Web/PWA version
+
+## Crate Workspace
+
+```
+duckTerm/
+├── Cargo.toml                    ← workspace root
+├── crates/
+│   ├── duckterm-core/            ← shared: serial, mock, protocol, buffer
+│   ├── duckterm-gui/             ← Tauri desktop app
+│   └── duckterm-tui/             ← ratatui terminal app
+├── src/                          ← Preact frontend (GUI)
+├── site/                         ← Landing page
+└── docs/                         ← Documentation
+```
+
+**Key rule:** New serial/protocol logic goes into `duckterm-core`. Both GUI and TUI consume it. Never duplicate serial logic in edition-specific crates.
 
 ## Language Rules
 
@@ -32,38 +51,10 @@ Skills live in-repo and are committed:
 
 Both auto-discovered by OpenCode from the repo root.
 
-**Key skills for this project (13 vendor + 3 hand-written):**
-
-Vendor (`.agents/skills/`):
-- `daisyui` — Component library, theme system
-- `tauri` — Tauri v2 patterns
-- `tauri-ipc` — Tauri IPC command/event patterns
-- `frontend-design` — UI quality, design principles
-- `emil-design-eng` — Animation, polish, micro-interactions
-- `brainstorming` — Feature design before implementation
-- `systematic-debugging` — Root cause analysis
-- `test-driven-development` — TDD workflow
-- `verification-before-completion` — Verify before claiming done
-- `conventional-commit` — Git commit format
-- `git-commit` — Git commit creation
-- `documentation-and-adrs` — ADR + documentation standards
-- `embedded-dev` — Hardware testing (ESP32, UART, serial)
-
-Hand-written (`.opencode/skills/`):
-- `create-adr` — DT-XXXX ADR creation
-- `test-hardware` — Serial test procedures (loopback, port discovery)
-- `conventional-commit` — Repo-specific commit rules
-
-## Sub-agent Delegation Protocol
-
-- `@explore` — Fast codebase exploration, file discovery, pattern search
-- `@general` — Complex multi-step tasks, implementation work
-
-Always provide explicit task descriptions. Never dispatch without clear scope.
-
 ## Documentation & ADR Lifecycle
 
-- **ADRs** (`docs/ADR/DT-XXXX-*`): Immutable once `Accepted`. Mark old as `Deprecated` or `Superseded`.
+- **ADRs** (`docs/decisions/DT-XXXX-*`): Immutable once `Accepted`. Mark old as `Deprecated` or `Superseded`.
+- **Plans** (`docs/plans/`): Feature roadmaps with checklists.
 - **Architecture** (`docs/architecture/`): System diagrams, data flow.
 - **Changelog** (`docs/changelog/CHANGELOG.md`): Keep-a-Changelog format. Never modify historical entries.
 
@@ -76,17 +67,15 @@ Sequential numbering for ADRs (DT-0001, DT-0002...). No gaps. No deletion.
 - Push without explicit user request
 - Modify ADRs marked as `Accepted` (create new instead)
 - Skip verification before claiming completion
+- Duplicate serial logic outside `duckterm-core`
 - Use `transition: all` in CSS animations
-- Use `scale(0)` for entrance animations
-- Use `ease-in` on UI interactions
-- Add comments unless explicitly asked
 
 **Agent MUST:**
-- Run verification commands before claiming work is complete
+- Run `cargo test` and `pnpm check` before claiming work is complete
 - Follow Conventional Commits format
 - Branch from `dev`, never `main`
-- Keep terminal buffer size configurable (default 10,000 lines)
-- Test with real hardware when possible
+- Keep terminal buffer size configurable
+- Test with mock feature when no hardware available (`--features mock`)
 
 ## Task Workflow
 
@@ -97,7 +86,7 @@ Issue → Plan → Branch (dev) → Implement → Verify → PR → Review → M
 1. Classify task: Spike / Bounded / Architectural
 2. Create branch from `dev`: `type/scope-description`
 3. Implement with tests
-4. Run verification (lint, typecheck, build)
+4. Run verification: `cargo test`, `cargo test --features mock`, `pnpm check`, `pnpm build`
 5. Commit with Conventional Commits
 6. Create PR (never push to main directly)
 
@@ -111,32 +100,31 @@ Issue → Plan → Branch (dev) → Implement → Verify → PR → Review → M
 
 **Commit format:** `type(scope): subject`
 - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`, `build`, `style`
-- Scope: `serial`, `ui`, `tauri`, `docs`, etc.
+- Scope: `core`, `gui`, `tui`, `serial`, `ui`, `docs`, `site`, etc.
 - Subject: imperative mood, ≤72 chars, no period
 
-## Design System Protocol
+## Design System Protocol (GUI)
 
 - **Framework:** Tailwind CSS v4 + DaisyUI v5
 - **Theme:** Custom `duckterm` theme (dark, oklch colors)
-- **Font:** JetBrains Mono (monospace)
+- **Font:** JetBrains Mono (monospace), Inter (UI)
 - **Animations:** ease-out for entering, ease-in forbidden on UI, sub-300ms
 - **Accessibility:** `prefers-reduced-motion` must be honored
 - **Components:** Use DaisyUI components, avoid custom when possible
 
-## Ponytail Integration
+## Feature Roadmap
 
-Ponytail is active. Follow the 7-step decision ladder before writing code:
-1. YAGNI — Does this need to exist?
-2. Codebase Reuse — Is there already code for this?
-3. Standard Library — Can the stdlib handle it?
-4. Native Platform — Does the OS already do this?
-5. Installed Dependencies — Is there already a dependency?
-6. One-liner — Can this be a single line?
-7. Minimum Implementation — Write the least code possible
+See `docs/plans/docklight-feature-parity.md` for the full feature plan:
+- **P0 (MVP):** Core serial + hex view + signal control (current sprint)
+- **P1 (v1.0):** Sequences, checksums, logging, multi-tab, project save/load
+- **P2 (v1.x):** TCP/UDP, scripting, Modbus, monitoring mode, data visualization
 
 ## References
 
-- ADR index: `docs/ADR/INDEX.md`
+- ADR index: `docs/decisions/INDEX.md`
+- Feature plan: `docs/plans/docklight-feature-parity.md`
+- Architecture: `docs/architecture/OVERVIEW.md`
 - Tauri docs: https://v2.tauri.app
 - DaisyUI docs: https://daisyui.com
-- Svelte docs: https://svelte.dev
+- ratatui docs: https://ratatui.rs
+- Preact docs: https://preactjs.com

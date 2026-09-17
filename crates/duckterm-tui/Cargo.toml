@@ -1,0 +1,20 @@
+[package]
+name = "duckterm-tui"
+version = "0.1.0"
+edition = "2021"
+description = "duckTerm TUI — ratatui-based serial terminal for headless/SSH use"
+
+[[bin]]
+name = "duckterm-tui"
+path = "src/main.rs"
+
+[dependencies]
+duckterm-core = { path = "../duckterm-core" }
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+
+[features]
+default = []
+mock = ["duckterm-core/mock"]
